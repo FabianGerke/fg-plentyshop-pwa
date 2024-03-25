@@ -4,6 +4,7 @@ import cors from 'cors';
 import config from '../middleware.config';
 import * as express from 'express';
 
+// eslint-disable-next-line max-statements
 (async () => {
   const app = await createServer({ integrations: config.integrations });
   const host = process.argv[2] ?? '0.0.0.0';
@@ -22,7 +23,11 @@ import * as express from 'express';
     jsonMiddleware.handle = express.json({ limit: '13.5mb' }); // 13,3mb for 10mb upload file
   }
 
-  app.listen(port, host, async () => {
+  app.listen(port, host, () => {
     consola.success(`API server listening on http://${host}:${port}`);
+  });
+
+  app.on('error', (error: any) => {
+    consola.error(error);
   });
 })();
