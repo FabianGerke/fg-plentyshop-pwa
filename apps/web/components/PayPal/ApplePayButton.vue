@@ -136,9 +136,9 @@ onMounted(async () => {
           const applePayButtonContainer = document.querySelector('#apple-pay-button');
           if (applePayButtonContainer) {
             applePayButtonContainer.innerHTML =
-              '<apple-pay-button id="btn-appl" buttonstyle="black" type="buy" locale="en"/>';
+              '<apple-pay-button id="btn-appl" buttonstyle="black" type="buy" locale="en" @click="$emit(\'validateTerms\')"/>';
             const applePayButton = document.querySelector('#btn-appl');
-            if (applePayButton && !disabled) {
+            if (applePayButton && !disabled.value) {
               applePayButton.addEventListener('click', () => {
                 applePayPayment();
               });
@@ -154,12 +154,3 @@ onMounted(async () => {
   });
 });
 </script>
-
-<style>
-.btn-appl {
-  width: 100%;
-}
-.apple-pay-btn {
-  height: 50px;
-}
-</style>

@@ -98,7 +98,7 @@
             <PayPalApplePayButton
               :disabled="!termsAccepted || disableShippingPayment || cartLoading"
               type="applepay"
-              @click="validateTerms"
+              @validate-terms="validateTerms"
             />
           </OrderSummary>
         </div>
