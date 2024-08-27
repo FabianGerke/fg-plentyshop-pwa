@@ -90,9 +90,14 @@
                 {{ t('buy') }}
               </span>
             </UiButton>
+            <div class="flex items-center justify-center w-full my-2">
+              <div class="border-t-2 flex-grow"></div>
+              <p class="px-2 text-sm uppercase text-gray-400">{{ $t('or') }}</p>
+              <div class="border-t-2 flex-grow"></div>
+            </div>
             <PayPalApplePayButton
-              v-if="selectedPaymentId === paypalPaymentId"
               :disabled="!termsAccepted || disableShippingPayment || cartLoading"
+              @on-click="validateTerms"
             />
           </OrderSummary>
         </div>
