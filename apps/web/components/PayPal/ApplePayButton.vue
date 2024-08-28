@@ -47,11 +47,6 @@ const applePayPayment = async () => {
   if (!applePayConfig.value) {
     return;
   }
-
-  const success = await onClick();
-  if (!success) {
-    return;
-  }
   const applePay = (paypal as any).Applepay() as ApplepayType;
   try {
     const paymentRequest = {
@@ -163,8 +158,12 @@ onMounted(async () => {
               '</p><div class="border-t-2 flex-grow"></div></div><apple-pay-button id="btn-appl" buttonstyle="black" type="buy" locale="en" />';
             const applePayButton = document.querySelector('#btn-appl');
             if (applePayButton) {
-              applePayButton.addEventListener('click', () => {
-                applePayPayment();
+              applePayButton.addEventListener('click', async () => {
+                const success = await onClick();
+                if (!success) {
+                  return;
+                }
+                await applePayPayment();
               });
             }
           }
