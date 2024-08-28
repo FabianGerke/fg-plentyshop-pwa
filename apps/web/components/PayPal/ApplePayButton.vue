@@ -1,9 +1,4 @@
 <template>
-  <div class="flex items-center justify-center w-full my-2" v-show="isEligibleApplePay">
-    <div class="border-t-2 flex-grow"></div>
-    <p class="px-2 text-sm uppercase text-gray-400">{{ $t('or') }}</p>
-    <div class="border-t-2 flex-grow"></div>
-  </div>
   <div id="apple-pay-button"></div>
 </template>
 
@@ -19,7 +14,7 @@ const currency = computed(() => cartGetters.getCurrency(cart.value) || (useAppCo
 const applePayConfig = ref<ConfigResponse | null>(null);
 const paypal = await loadScript(currency.value);
 const localePath = useLocalePath();
-let isEligibleApplePay = false;
+const { t } = useI18n();
 
 const emits = defineEmits<{
   (event: 'on-click', callback: (successfully: boolean) => void): void;
@@ -160,11 +155,12 @@ onMounted(async () => {
       .then((config: ConfigResponse) => {
         applePayConfig.value = config;
         if (config.isEligible) {
-          isEligibleApplePay = true;
           const applePayButtonContainer = document.querySelector('#apple-pay-button');
           if (applePayButtonContainer) {
             applePayButtonContainer.innerHTML =
-              '<apple-pay-button id="btn-appl" buttonstyle="black" type="buy" locale="en" @click="$emit(\'validateTerms\')"/>';
+              '<div class="flex items-center justify-center w-full my-2"><div class="border-t-2 flex-grow"></div> <p class="px-2 text-sm uppercase text-gray-400">' +
+              t('or') +
+              '</p><div class="border-t-2 flex-grow"></div></div><apple-pay-button id="btn-appl" buttonstyle="black" type="buy" locale="en" />';
             const applePayButton = document.querySelector('#btn-appl');
             if (applePayButton) {
               applePayButton.addEventListener('click', () => {
