@@ -147,13 +147,12 @@ onMounted(async () => {
               applePayButton.addEventListener('click', async () => {
                 emits('button-clicked', async (successfully) => {
                   if (successfully) {
-                    applePayPayment().then(() => {
-                      isApplepayLoaded = true;
-                    });
+                    applePayPayment();
                   }
                 });
               });
             }
+            isApplepayLoaded = true;
           }
         }
         return null;
