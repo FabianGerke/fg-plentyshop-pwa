@@ -1,4 +1,9 @@
 <template>
+  <div class="flex items-center justify-center w-full my-2" v-if="isPaypalLoaded">
+    <div class="border-t-2 flex-grow"></div>
+    <p class="px-2 text-sm uppercase text-gray-400">{{ $t('or') }}</p>
+    <div class="border-t-2 flex-grow"></div>
+  </div>
   <div id="apple-pay-button"></div>
 </template>
 
@@ -14,7 +19,7 @@ const currency = computed(() => cartGetters.getCurrency(cart.value) || (useAppCo
 const applePayConfig = ref<ConfigResponse | null>(null);
 const paypal = await loadScript(currency.value);
 const localePath = useLocalePath();
-const { t } = useI18n();
+let isPaypalLoaded = false;
 
 const loadApplePay = async () => {
   const scriptElement = document.createElement('script');
@@ -120,6 +125,8 @@ const applePayPayment = async () => {
     });
 
     paymentSession.begin();
+
+    isPaypalLoaded = true;
   } catch (error) {
     console.error(error);
   }
@@ -156,23 +163,5 @@ onMounted(async () => {
       });
     return null;
   });
-
-  const targetNode = document.body;
-  const observer = new MutationObserver((mutationsList, observer) => {
-    const applePayButton = document.querySelector('#btn-appl');
-
-    if (applePayButton) {
-      const prependContent =
-        '<div class="flex items-center justify-center w-full my-2"><div class="border-t-2 flex-grow"></div> <p class="px-2 text-sm uppercase text-gray-400">' +
-        t('or') +
-        '</p><div class="border-t-2 flex-grow"></div></div>';
-      applePayButton.insertAdjacentHTML('afterbegin', prependContent);
-      observer.disconnect();
-    }
-  });
-
-  observer.observe(targetNode, { childList: true, subtree: true });
-
-  setTimeout(() => observer.disconnect(), 10_000);
 });
 </script>
