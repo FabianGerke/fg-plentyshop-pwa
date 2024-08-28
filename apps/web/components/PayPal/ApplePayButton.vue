@@ -16,32 +16,13 @@ const paypal = await loadScript(currency.value);
 const localePath = useLocalePath();
 const { t } = useI18n();
 
-const emits = defineEmits<{
-  (event: 'on-click', callback: (successfully: boolean) => void): void;
-}>();
-
-const checkOnClickEvent = (): boolean => {
-  const props = getCurrentInstance()?.vnode.props;
-  return !!(props && props['onOnClick']);
-};
-
-const onClick = async (): Promise<boolean> => {
-  return new Promise<boolean>((resolve) => {
-    if (checkOnClickEvent()) {
-      emits('on-click', (successfully) => {
-        resolve(successfully);
-      });
-    } else {
-      resolve(true);
-    }
-  });
-};
 const loadApplePay = async () => {
   const scriptElement = document.createElement('script');
   scriptElement.setAttribute('src', 'https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js');
   scriptElement.setAttribute('type', 'text/javascript');
   document.head.append(scriptElement);
 };
+const emit = defineEmits(['button-clicked']);
 
 const applePayPayment = async () => {
   if (!applePayConfig.value) {
@@ -159,11 +140,7 @@ onMounted(async () => {
             const applePayButton = document.querySelector('#btn-appl');
             if (applePayButton) {
               applePayButton.addEventListener('click', async () => {
-                const success = await onClick();
-                if (!success) {
-                  return;
-                }
-                await applePayPayment();
+                emit('button-clicked', applePayPayment());
               });
             }
           }

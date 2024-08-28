@@ -92,7 +92,7 @@
             </UiButton>
             <PayPalApplePayButton
               :style="createOrderLoading || disableShippingPayment || cartLoading ? 'pointer-events: none;' : ''"
-              @on-click="validateTerms"
+              @button-clicked="validateTerms()"
             />
           </OrderSummary>
         </div>
