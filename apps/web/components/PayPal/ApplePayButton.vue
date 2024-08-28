@@ -36,6 +36,7 @@ const applePayPayment = async () => {
     return;
   }
   const applePay = (paypal as any).Applepay() as ApplepayType;
+  isPaypalLoaded = true;
   try {
     const paymentRequest = {
       countryCode: applePayConfig.value?.countryCode,
@@ -125,8 +126,6 @@ const applePayPayment = async () => {
     });
 
     paymentSession.begin();
-
-    isPaypalLoaded = true;
   } catch (error) {
     console.error(error);
   }
