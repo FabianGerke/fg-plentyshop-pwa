@@ -135,13 +135,16 @@ onMounted(async () => {
     const applePay = (paypal as any).Applepay() as ApplepayType;
     applePay
       .config()
-      .then((config: ConfigResponse) => {
+      .then(async (config: ConfigResponse) => {
         applePayConfig.value = config;
         if (config.isEligible) {
           const applePayButtonContainer = document.querySelector('#apple-pay-button');
           if (applePayButtonContainer) {
             applePayButtonContainer.innerHTML =
               '<apple-pay-button id="btn-appl" buttonstyle="black" type="buy" locale="en" />';
+
+            await nextTick();
+
             const applePayButton = document.querySelector('#btn-appl');
             if (applePayButton) {
               applePayButton.addEventListener('click', async () => {
