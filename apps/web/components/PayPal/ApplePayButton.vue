@@ -1,4 +1,9 @@
 <template>
+  <div class="flex items-center justify-center w-full my-2" v-show="isEligibleApplePay">
+    <div class="border-t-2 flex-grow"></div>
+    <p class="px-2 text-sm uppercase text-gray-400">{{ $t('or') }}</p>
+    <div class="border-t-2 flex-grow"></div>
+  </div>
   <div id="apple-pay-button"></div>
 </template>
 
@@ -13,8 +18,8 @@ const { shippingPrivacyAgreement } = useAdditionalInformation();
 const currency = computed(() => cartGetters.getCurrency(cart.value) || (useAppConfig().fallbackCurrency as string));
 const applePayConfig = ref<ConfigResponse | null>(null);
 const paypal = await loadScript(currency.value);
-const applePay = (paypal as any).Applepay() as ApplepayType;
 const localePath = useLocalePath();
+let isEligibleApplePay = false;
 
 const emits = defineEmits<{
   (event: 'on-click', callback: (successfully: boolean) => void): void;
@@ -52,7 +57,7 @@ const applePayPayment = async () => {
   if (!success) {
     return;
   }
-
+  const applePay = (paypal as any).Applepay() as ApplepayType;
   try {
     const paymentRequest = {
       countryCode: applePayConfig.value?.countryCode,
@@ -149,11 +154,13 @@ const applePayPayment = async () => {
 
 onMounted(async () => {
   await loadApplePay().then(() => {
+    const applePay = (paypal as any).Applepay() as ApplepayType;
     applePay
       .config()
       .then((config: ConfigResponse) => {
         applePayConfig.value = config;
         if (config.isEligible) {
+          isEligibleApplePay = true;
           const applePayButtonContainer = document.querySelector('#apple-pay-button');
           if (applePayButtonContainer) {
             applePayButtonContainer.innerHTML =
