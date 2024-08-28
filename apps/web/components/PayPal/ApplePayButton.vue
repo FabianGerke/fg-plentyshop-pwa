@@ -136,9 +136,9 @@ onMounted(async () => {
           const applePayButtonContainer = document.querySelector('#apple-pay-button');
           if (applePayButtonContainer) {
             applePayButtonContainer.innerHTML =
-              '<div class="flex items-center justify-center w-full my-2"><div class="border-t-2 flex-grow"></div> <p class="px-2 text-sm uppercase text-gray-400">' +
+              '<apple-pay-button id="btn-appl" buttonstyle="black" type="buy" locale="en"><div class="flex items-center justify-center w-full my-2"><div class="border-t-2 flex-grow"></div> <p class="px-2 text-sm uppercase text-gray-400">' +
               t('or') +
-              '</p><div class="border-t-2 flex-grow"></div></div><apple-pay-button id="btn-appl" buttonstyle="black" type="buy" locale="en" />';
+              '</p><div class="border-t-2 flex-grow"></div></div></apple-pay-button>';
             const applePayButton = document.querySelector('#btn-appl');
             if (applePayButton) {
               applePayButton.addEventListener('click', async () => {
