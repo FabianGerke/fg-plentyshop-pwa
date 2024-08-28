@@ -51,9 +51,9 @@
   }
 }
 
-#btn-appl {
-  width: 100% !important;
-}
-.apple-pay-btn {
-  height: 50px !important;
+.apple-pay-button {
+  --apple-pay-button-width: 100%;
+  --apple-pay-button-height: 50px;
+  --apple-pay-button-border-radius: 7px;
+  --apple-pay-button-box-sizing: border-box;
 }
