@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ApplepayType, ConfigResponse } from '~/components/PayPal/types';
+import { ApplepayType, ConfigResponse, PayPalAddToCartCallback } from '~/components/PayPal/types';
 import { cartGetters, orderGetters } from '@plentymarkets/shop-api';
 
 const { loadScript, executeOrder, createTransaction } = usePayPal();
@@ -22,7 +22,9 @@ const loadApplePay = async () => {
   scriptElement.setAttribute('type', 'text/javascript');
   document.head.append(scriptElement);
 };
-const emit = defineEmits(['button-clicked']);
+const emits = defineEmits<{
+  (event: 'button-clicked', callback: PayPalAddToCartCallback): Promise<void>;
+}>();
 
 const applePayPayment = async () => {
   if (!applePayConfig.value) {
@@ -140,8 +142,8 @@ onMounted(async () => {
             const applePayButton = document.querySelector('#btn-appl');
             if (applePayButton) {
               applePayButton.addEventListener('click', async () => {
-                emit('button-clicked', (result: boolean) => {
-                  if (result) {
+                emits('button-clicked', async (successfully) => {
+                  if (successfully) {
                     applePayPayment();
                   }
                 });
