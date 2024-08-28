@@ -173,6 +173,6 @@ onMounted(async () => {
 
   observer.observe(targetNode, { childList: true, subtree: true });
 
-  setTimeout(() => observer.disconnect(), 10_000); // Stop observing after 10 seconds
+  setTimeout(() => observer.disconnect(), 10_000);
 });
 </script>
