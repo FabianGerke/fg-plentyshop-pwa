@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ApplepayType, ConfigResponse, PaypalButtonPropsType } from '~/components/PayPal/types';
+import { ApplepayType, ConfigResponse } from '~/components/PayPal/types';
 import { cartGetters, orderGetters } from '@plentymarkets/shop-api';
 
 const { loadScript, executeOrder, createTransaction } = usePayPal();
@@ -16,10 +16,10 @@ const paypal = await loadScript(currency.value);
 const applePay = (paypal as any).Applepay() as ApplepayType;
 const localePath = useLocalePath();
 
-const props = withDefaults(defineProps<PaypalButtonPropsType>(), {
-  disabled: false,
-});
-const { disabled } = toRefs(props);
+// const props = withDefaults(defineProps<PaypalButtonPropsType>(), {
+//   disabled: false,
+// });
+// const { disabled } = toRefs(props);
 
 const loadApplePay = async () => {
   const scriptElement = document.createElement('script');
@@ -138,7 +138,7 @@ onMounted(async () => {
             applePayButtonContainer.innerHTML =
               '<apple-pay-button id="btn-appl" buttonstyle="black" type="buy" locale="en" @click="$emit(\'validateTerms\')"/>';
             const applePayButton = document.querySelector('#btn-appl');
-            if (applePayButton && !disabled.value) {
+            if (applePayButton) {
               applePayButton.addEventListener('click', () => {
                 applePayPayment();
               });
