@@ -16,11 +16,26 @@ const paypal = await loadScript(currency.value);
 const applePay = (paypal as any).Applepay() as ApplepayType;
 const localePath = useLocalePath();
 
-// const props = withDefaults(defineProps<PaypalButtonPropsType>(), {
-//   disabled: false,
-// });
-// const { disabled } = toRefs(props);
+const emits = defineEmits<{
+  (event: 'on-click', callback: (successfully: boolean) => void): void;
+}>();
 
+const checkOnClickEvent = (): boolean => {
+  const props = getCurrentInstance()?.vnode.props;
+  return !!(props && props['onOnClick']);
+};
+
+const onClick = async (): Promise<boolean> => {
+  return new Promise<boolean>((resolve) => {
+    if (checkOnClickEvent()) {
+      emits('on-click', (successfully) => {
+        resolve(successfully);
+      });
+    } else {
+      resolve(true);
+    }
+  });
+};
 const loadApplePay = async () => {
   const scriptElement = document.createElement('script');
   scriptElement.setAttribute('src', 'https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js');
@@ -32,6 +47,12 @@ const applePayPayment = async () => {
   if (!applePayConfig.value) {
     return;
   }
+
+  const success = await onClick();
+  if (!success) {
+    return;
+  }
+
   try {
     const paymentRequest = {
       countryCode: applePayConfig.value?.countryCode,

@@ -95,7 +95,10 @@
               <p class="px-2 text-sm uppercase text-gray-400">{{ $t('or') }}</p>
               <div class="border-t-2 flex-grow"></div>
             </div>
-            <PayPalApplePayButton :disabled="!termsAccepted || disableShippingPayment || cartLoading" type="applepay" />
+            <PayPalApplePayButton
+              :style="!termsAccepted || disableShippingPayment || cartLoading ? 'pointer-events: none;' : ''"
+              @on-click="validateTerms"
+            />
           </OrderSummary>
         </div>
       </div>
