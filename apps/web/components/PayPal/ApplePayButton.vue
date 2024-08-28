@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center justify-center w-full my-2" v-if="isPaypalLoaded">
+  <div class="flex items-center justify-center w-full my-2" v-if="isApplepayLoaded">
     <div class="border-t-2 flex-grow"></div>
     <p class="px-2 text-sm uppercase text-gray-400">{{ $t('or') }}</p>
     <div class="border-t-2 flex-grow"></div>
@@ -19,7 +19,7 @@ const currency = computed(() => cartGetters.getCurrency(cart.value) || (useAppCo
 const applePayConfig = ref<ConfigResponse | null>(null);
 const paypal = await loadScript(currency.value);
 const localePath = useLocalePath();
-let isPaypalLoaded = false;
+let isApplepayLoaded = false;
 
 const loadApplePay = async () => {
   const scriptElement = document.createElement('script');
@@ -36,7 +36,6 @@ const applePayPayment = async () => {
     return;
   }
   const applePay = (paypal as any).Applepay() as ApplepayType;
-  isPaypalLoaded = true;
   try {
     const paymentRequest = {
       countryCode: applePayConfig.value?.countryCode,
@@ -148,7 +147,9 @@ onMounted(async () => {
               applePayButton.addEventListener('click', async () => {
                 emits('button-clicked', async (successfully) => {
                   if (successfully) {
-                    applePayPayment();
+                    applePayPayment().then(() => {
+                      isApplepayLoaded = true;
+                    });
                   }
                 });
               });
