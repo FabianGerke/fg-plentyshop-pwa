@@ -140,7 +140,11 @@ onMounted(async () => {
             const applePayButton = document.querySelector('#btn-appl');
             if (applePayButton) {
               applePayButton.addEventListener('click', async () => {
-                emit('button-clicked', applePayPayment());
+                emit('button-clicked', (result: boolean) => {
+                  if (result) {
+                    applePayPayment();
+                  }
+                });
               });
             }
           }
