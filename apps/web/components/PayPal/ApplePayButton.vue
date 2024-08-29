@@ -154,8 +154,9 @@ onMounted(async () => {
                   }
                 });
               });
+              const computedStyle = window.getComputedStyle(applePayButton);
+              isApplepayLoaded = computedStyle.display !== 'none';
             }
-            isApplepayLoaded = true;
           }
         }
         return null;
