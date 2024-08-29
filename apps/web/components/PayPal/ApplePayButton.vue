@@ -132,6 +132,11 @@ const applePayPayment = async () => {
 
 onMounted(async () => {
   await loadApplePay().then(() => {
+    if (ApplePaySession.canMakePayments()) {
+      isApplepayLoaded = true;
+    } else {
+      console.error('This device is not capable of making Apple Pay payments');
+    }
     const applePay = (paypal as any).Applepay() as ApplepayType;
     applePay
       .config()
@@ -154,8 +159,6 @@ onMounted(async () => {
                   }
                 });
               });
-              const computedStyle = window.getComputedStyle(applePayButton);
-              isApplepayLoaded = computedStyle.display !== 'none';
             }
           }
         }
