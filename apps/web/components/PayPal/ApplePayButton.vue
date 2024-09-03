@@ -69,21 +69,14 @@ const applePayPayment = async () => {
 
     paymentSession.onpaymentauthorized = async (event: ApplePayJS.ApplePayPaymentAuthorizedEvent) => {
       try {
-        console.log('Starting transaction creation...');
         const transaction = await createTransaction('applepay');
         if (!transaction || !transaction.id) throw new Error('Transaction creation failed.');
 
-        console.log('Creating order...');
         const order = await createOrder({
           paymentId: cart.value.methodOfPaymentId,
           shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
         });
         if (!order || !order.order || !order.order.id) throw new Error('Order creation failed.');
-
-        console.log('Confirming Apple Pay order...');
-        console.log('Transaction ID:', transaction.id);
-        console.log('Payment Token:', event.payment.token);
-        console.log('Billing Contact:', event.payment.billingContact);
 
         try {
           await applePay.confirmOrder({
@@ -96,7 +89,6 @@ const applePayPayment = async () => {
           throw new Error('Apple Pay confirmation failed');
         }
 
-        console.log('Executing order...');
         await executeOrder({
           mode: 'paypal',
           plentyOrderId: Number.parseInt(orderGetters.getId(order)),
@@ -104,9 +96,9 @@ const applePayPayment = async () => {
         });
 
         paymentSession.completePayment(ApplePaySession.STATUS_SUCCESS);
-        console.log('Payment successful, clearing cart and navigating...');
 
         clearCartItems();
+
         navigateTo(localePath(paths.confirmation + '/' + order.order.id + '/' + order.order.accessKey));
       } catch (error) {
         console.error('Error during payment process:', error);
