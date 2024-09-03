@@ -81,11 +81,20 @@ const applePayPayment = async () => {
         if (!order || !order.order || !order.order.id) throw new Error('Order creation failed.');
 
         console.log('Confirming Apple Pay order...');
-        await applePay.confirmOrder({
-          orderId: transaction.id,
-          token: event.payment.token,
-          billingContact: event.payment.billingContact,
-        });
+        console.log('Transaction ID:', transaction.id);
+        console.log('Payment Token:', event.payment.token);
+        console.log('Billing Contact:', event.payment.billingContact);
+
+        try {
+          await applePay.confirmOrder({
+            orderId: transaction.id,
+            token: event.payment.token,
+            billingContact: event.payment.billingContact,
+          });
+        } catch (error) {
+          console.error('Error during Apple Pay confirmation:', error);
+          throw new Error('Apple Pay confirmation failed');
+        }
 
         console.log('Executing order...');
         await executeOrder({
