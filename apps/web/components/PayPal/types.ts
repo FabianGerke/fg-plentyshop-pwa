@@ -69,11 +69,11 @@ export type ApplePayPaymentContact = {
 export type ApplePayPaymentMethodType = 'debit' | 'credit' | 'prepaid' | 'store';
 
 export type ApplePayPaymentPassActivationState =
-    | 'activated'
-    | 'requiresActivation'
-    | 'activating'
-    | 'suspended'
-    | 'deactivated';
+  | 'activated'
+  | 'requiresActivation'
+  | 'activating'
+  | 'suspended'
+  | 'deactivated';
 
 export type ApplePayPaymentPass = {
   primaryAccountIdentifier: string;
@@ -122,6 +122,12 @@ export type ValidateMerchantResponse = {
 };
 
 export type ApplepayType = {
+  config(): Promise<ConfigResponse>;
+  validateMerchant(argument0: ValidateMerchantParams): Promise<ValidateMerchantResponse>;
+  confirmOrder(argument0: ConfirmOrderParams): Promise<void>;
+};
+
+export type GooglepayType = {
   config(): Promise<ConfigResponse>;
   validateMerchant(argument0: ValidateMerchantParams): Promise<ValidateMerchantResponse>;
   confirmOrder(argument0: ConfirmOrderParams): Promise<void>;
