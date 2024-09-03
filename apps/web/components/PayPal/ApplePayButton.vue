@@ -37,7 +37,7 @@ const setPaymentRequest = () => {
     supportedNetworks: applePayConfig.value?.supportedNetworks,
     currencyCode: currency.value,
     requiredShippingContactFields: [],
-    requiredBillingContactFields: [],
+    requiredBillingContactFields: ['postalAddress'],
     total: {
       type: 'final',
       label: 'Store',
