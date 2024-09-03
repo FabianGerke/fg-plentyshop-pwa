@@ -69,30 +69,38 @@ const applePayPayment = async () => {
 
     paymentSession.onpaymentauthorized = async (event: ApplePayJS.ApplePayPaymentAuthorizedEvent) => {
       try {
+        console.log('Starting transaction creation...');
         const transaction = await createTransaction('applepay');
+        if (!transaction || !transaction.id) throw new Error('Transaction creation failed.');
+
+        console.log('Creating order...');
         const order = await createOrder({
           paymentId: cart.value.methodOfPaymentId,
           shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
         });
+        if (!order || !order.order || !order.order.id) throw new Error('Order creation failed.');
+
+        console.log('Confirming Apple Pay order...');
         await applePay.confirmOrder({
-          orderId: transaction?.id ?? '',
+          orderId: transaction.id,
           token: event.payment.token,
           billingContact: event.payment.billingContact,
         });
+
+        console.log('Executing order...');
         await executeOrder({
           mode: 'paypal',
           plentyOrderId: Number.parseInt(orderGetters.getId(order)),
-          // eslint-disable-next-line promise/always-return
-          paypalTransactionId: transaction?.id ?? '',
+          paypalTransactionId: transaction.id,
         });
 
         paymentSession.completePayment(ApplePaySession.STATUS_SUCCESS);
+        console.log('Payment successful, clearing cart and navigating...');
 
         clearCartItems();
-
         navigateTo(localePath(paths.confirmation + '/' + order.order.id + '/' + order.order.accessKey));
       } catch (error) {
-        console.error(error);
+        console.error('Error during payment process:', error);
         paymentSession.completePayment(ApplePaySession.STATUS_FAILURE);
       }
     };
