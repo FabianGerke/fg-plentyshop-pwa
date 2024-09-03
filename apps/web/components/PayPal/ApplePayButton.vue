@@ -11,6 +11,7 @@
 import { ApplepayType, ConfigResponse, PayPalAddToCartCallback } from '~/components/PayPal/types';
 import { cartGetters, orderGetters } from '@plentymarkets/shop-api';
 
+let isApplepayLoaded = false;
 const { loadScript, executeOrder, createTransaction } = usePayPal();
 const { createOrder } = useMakeOrder();
 const { data: cart, clearCartItems } = useCart();
@@ -19,17 +20,31 @@ const currency = computed(() => cartGetters.getCurrency(cart.value) || (useAppCo
 const applePayConfig = ref<ConfigResponse | null>(null);
 const paypal = await loadScript(currency.value);
 const localePath = useLocalePath();
-let isApplepayLoaded = false;
-
+const emits = defineEmits<{
+  (event: 'button-clicked', callback: PayPalAddToCartCallback): Promise<void>;
+}>();
 const loadApplePay = async () => {
   const scriptElement = document.createElement('script');
   scriptElement.setAttribute('src', 'https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js');
   scriptElement.setAttribute('type', 'text/javascript');
   document.head.append(scriptElement);
 };
-const emits = defineEmits<{
-  (event: 'button-clicked', callback: PayPalAddToCartCallback): Promise<void>;
-}>();
+
+const setPaymentRequest = () => {
+  return {
+    countryCode: applePayConfig.value?.countryCode,
+    merchantCapabilities: applePayConfig.value?.merchantCapabilities,
+    supportedNetworks: applePayConfig.value?.supportedNetworks,
+    currencyCode: currency.value,
+    requiredShippingContactFields: [],
+    requiredBillingContactFields: [],
+    total: {
+      type: 'final',
+      label: 'Store',
+      amount: cartGetters.getTotals(cart.value).total.toString(),
+    },
+  } as ApplePayJS.ApplePayPaymentRequest;
+};
 
 const applePayPayment = async () => {
   if (!applePayConfig.value) {
@@ -37,87 +52,49 @@ const applePayPayment = async () => {
   }
   const applePay = (paypal as any).Applepay() as ApplepayType;
   try {
-    const paymentRequest = {
-      countryCode: applePayConfig.value?.countryCode,
-      merchantCapabilities: applePayConfig.value?.merchantCapabilities,
-      supportedNetworks: applePayConfig.value?.supportedNetworks,
-      currencyCode: currency.value,
-      requiredShippingContactFields: [],
-      requiredBillingContactFields: ['postalAddress'],
-      total: {
-        type: 'final',
-        label: 'Store',
-        amount: cartGetters.getTotals(cart.value).total.toString(),
-      },
-    } as ApplePayJS.ApplePayPaymentRequest;
-
+    const paymentRequest = setPaymentRequest();
     const paymentSession = new ApplePaySession(14, paymentRequest);
 
-    paymentSession.onvalidatemerchant = (event: ApplePayJS.ApplePayValidateMerchantEvent) => {
-      applePay
-        .validateMerchant({
+    paymentSession.onvalidatemerchant = async (event: ApplePayJS.ApplePayValidateMerchantEvent) => {
+      try {
+        const validationData = await applePay.validateMerchant({
           validationUrl: event.validationURL,
-        })
-        .then((validationData) => {
-          paymentSession.completeMerchantValidation(validationData.merchantSession);
-          return null;
-        })
-        .catch((error) => {
-          console.error(error);
-          paymentSession.abort();
         });
+        paymentSession.completeMerchantValidation(validationData.merchantSession);
+      } catch (error) {
+        console.error(error);
+        paymentSession.abort();
+      }
     };
 
-    paymentSession.onpaymentauthorized = (event: ApplePayJS.ApplePayPaymentAuthorizedEvent) => {
-      createTransaction('applepay')
-        .then((transaction) => {
-          createOrder({
-            paymentId: cart.value.methodOfPaymentId,
-            shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
-          })
-            .then((order) => {
-              try {
-                applePay
-                  .confirmOrder({
-                    orderId: transaction?.id ?? '',
-                    token: event.payment.token,
-                    billingContact: event.payment.billingContact,
-                  })
-                  .then(() => {
-                    executeOrder({
-                      mode: 'paypal',
-                      plentyOrderId: Number.parseInt(orderGetters.getId(order)),
-                      // eslint-disable-next-line promise/always-return
-                      paypalTransactionId: transaction?.id ?? '',
-                    });
-
-                    paymentSession.completePayment(ApplePaySession.STATUS_SUCCESS);
-
-                    clearCartItems();
-
-                    navigateTo(localePath(paths.confirmation + '/' + order.order.id + '/' + order.order.accessKey));
-
-                    return null;
-                  })
-                  .catch((error) => {
-                    console.error(error);
-                    paymentSession.completePayment(ApplePaySession.STATUS_FAILURE);
-                  });
-              } catch (error) {
-                console.error(error);
-              }
-              return null;
-            })
-            .catch((error) => {
-              console.error(error);
-              paymentSession.completePayment(ApplePaySession.STATUS_FAILURE);
-            });
-          return null;
-        })
-        .catch((error) => {
-          console.error(error);
-          paymentSession.completePayment(ApplePaySession.STATUS_FAILURE);
+    paymentSession.onpaymentauthorized = async (event: ApplePayJS.ApplePayPaymentAuthorizedEvent) => {
+      try {
+        const transaction = await createTransaction('applepay');
+        const order = await createOrder({
+          paymentId: cart.value.methodOfPaymentId,
+          shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
         });
+        await applePay.confirmOrder({
+          orderId: transaction?.id ?? '',
+          token: event.payment.token,
+          billingContact: event.payment.billingContact,
+        });
+        await executeOrder({
+          mode: 'paypal',
+          plentyOrderId: Number.parseInt(orderGetters.getId(order)),
+          // eslint-disable-next-line promise/always-return
+          paypalTransactionId: transaction?.id ?? '',
+        });
+
+        paymentSession.completePayment(ApplePaySession.STATUS_SUCCESS);
+
+        clearCartItems();
+
+        navigateTo(localePath(paths.confirmation + '/' + order.order.id + '/' + order.order.accessKey));
+      } catch (error) {
+        console.error(error);
+        paymentSession.completePayment(ApplePaySession.STATUS_FAILURE);
+      }
     };
 
     paymentSession.addEventListener('cancel', () => {
@@ -133,10 +110,8 @@ const applePayPayment = async () => {
 onMounted(async () => {
   // eslint-disable-next-line sonarjs/cognitive-complexity
   await loadApplePay().then(() => {
-    if (ApplePaySession.canMakePayments()) {
+    if (typeof ApplePaySession !== 'undefined' && ApplePaySession.canMakePayments()) {
       isApplepayLoaded = true;
-    } else {
-      console.error('This device is not capable of making Apple Pay payments');
     }
     const applePay = (paypal as any).Applepay() as ApplepayType;
     applePay
@@ -148,8 +123,6 @@ onMounted(async () => {
           if (applePayButtonContainer) {
             applePayButtonContainer.innerHTML =
               '<apple-pay-button id="btn-appl" buttonstyle="black" type="buy" locale="en" />';
-
-            await nextTick();
 
             const applePayButton = document.querySelector('#btn-appl');
             if (applePayButton) {
