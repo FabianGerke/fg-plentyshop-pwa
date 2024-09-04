@@ -46,7 +46,7 @@ let paymentsClient: google.payments.api.PaymentsClient | null = null,
 async function getGooglePayConfig() {
   if (googlepayConfig === null) {
     googlepayConfig = await (paypal as any).Googlepay().config();
-    console.log(' ===== Google Pay Config Fetched ===== ');
+    console.log(' ===== Google Pay Config Fetched =====', googlepayConfig);
   }
   return googlepayConfig;
 }
@@ -74,6 +74,7 @@ async function getGooglePaymentDataRequest() {
     merchantInfo,
     callbackIntents,
   };
+  console.log('baseRequest', baseRequest);
   const paymentDataRequest = Object.assign({}, baseRequest);
   paymentDataRequest.allowedPaymentMethods = allowedPaymentMethods;
   paymentDataRequest.transactionInfo = getGoogleTransactionInfo(countryCode);
@@ -116,7 +117,6 @@ function onPaymentAuthorized(paymentData: any): Promise<google.payments.api.Paym
 }
 
 function getGooglePaymentsClient() {
-  console.log('Payments client1', paymentsClient);
   if (paymentsClient === null) {
     paymentsClient = new google.payments.api.PaymentsClient({
       environment: 'TEST',
@@ -125,7 +125,7 @@ function getGooglePaymentsClient() {
       },
     });
   }
-  console.log('Payments client2', paymentsClient);
+  console.log('Payments client', paymentsClient);
   return paymentsClient;
 }
 /**
@@ -189,7 +189,7 @@ function getGoogleTransactionInfo(countryCode: any) {
       },
     ],
     countryCode: countryCode,
-    currencyCode: 'USD',
+    currencyCode: 'EUR',
     totalPriceStatus: 'FINAL',
     totalPrice: '0.10',
     totalPriceLabel: 'Total',
@@ -215,7 +215,6 @@ async function onGooglePaymentButtonClicked() {
  * @param {object} paymentData response from Google Pay API after user approves payment
  * @see {@link https://developers.google.com/pay/api/web/reference/response-objects#PaymentData|PaymentData object reference}
  */
-// eslint-disable-next-line sonarjs/cognitive-complexity
 async function processPayment(paymentData: any) {
   console.log('process payment');
   const resultElement = document.querySelector('#result');
