@@ -149,7 +149,7 @@ function addGooglePayButton() {
   const button = paymentsClient.createButton({
     onClick: onGooglePaymentButtonClicked,
   });
-  const theContainer = document.querySelector('#container');
+  const theContainer = document.querySelector('#google-pay-button');
   if (theContainer) {
     theContainer.append(button);
   }
@@ -196,6 +196,7 @@ async function onGooglePaymentButtonClicked() {
  * @param {object} paymentData response from Google Pay API after user approves payment
  * @see {@link https://developers.google.com/pay/api/web/reference/response-objects#PaymentData|PaymentData object reference}
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 async function processPayment(paymentData: any) {
   const resultElement = document.querySelector('#result');
   if (resultElement) {
