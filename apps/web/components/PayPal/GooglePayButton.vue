@@ -119,7 +119,7 @@ function onPaymentAuthorized(paymentData: any): Promise<google.payments.api.Paym
 function getGooglePaymentsClient() {
   if (paymentsClient === null) {
     paymentsClient = new google.payments.api.PaymentsClient({
-      environment: 'TEST',
+      environment: 'PRODUCTION',
       paymentDataCallbacks: {
         onPaymentAuthorized: onPaymentAuthorized,
       },
