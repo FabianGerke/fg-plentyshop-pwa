@@ -8,13 +8,18 @@
 </template>
 
 <script lang="ts" setup>
+import { PayPalAddToCartCallback } from '~/components/PayPal/types';
 import { cartGetters } from '@plentymarkets/shop-api';
 
 let isGooglePayLoaded = false;
-const { loadScript } = usePayPal();
+const { loadScript, executeOrder, createTransaction } = usePayPal();
+const { createOrder } = useMakeOrder();
 const { data: cart } = useCart();
 const currency = computed(() => cartGetters.getCurrency(cart.value) || (useAppConfig().fallbackCurrency as string));
 const paypal = await loadScript(currency.value);
+const emits = defineEmits<{
+  (event: 'button-clicked', callback: PayPalAddToCartCallback): Promise<void>;
+}>();
 const loadGooglePay = async () => {
   return new Promise((resolve, reject) => {
     const scriptElement = document.createElement('script');
@@ -195,9 +200,13 @@ function getGoogleTransactionInfo(countryCode: any) {
  */
 async function onGooglePaymentButtonClicked() {
   console.log('on google button clicked');
-  const paymentDataRequest = await getGooglePaymentDataRequest();
-  const paymentsClient = getGooglePaymentsClient();
-  paymentsClient.loadPaymentData(paymentDataRequest);
+  emits('button-clicked', async (successfully) => {
+    if (successfully) {
+      const paymentDataRequest = await getGooglePaymentDataRequest();
+      const paymentsClient = getGooglePaymentsClient();
+      paymentsClient.loadPaymentData(paymentDataRequest);
+    }
+  });
 }
 
 /**
@@ -208,6 +217,7 @@ async function onGooglePaymentButtonClicked() {
  */
 // eslint-disable-next-line sonarjs/cognitive-complexity
 async function processPayment(paymentData: any) {
+  console.log('process payment');
   const resultElement = document.querySelector('#result');
   if (resultElement) {
     const modal = document.querySelector('#resultModal');
