@@ -74,6 +74,7 @@ async function getGooglePaymentDataRequest() {
   paymentDataRequest.transactionInfo = getGoogleTransactionInfo(countryCode);
   paymentDataRequest.merchantInfo = merchantInfo;
   paymentDataRequest.callbackIntents = ['PAYMENT_AUTHORIZATION'];
+  console.log('paymentdatarequest', paymentDataRequest);
   return paymentDataRequest;
 }
 
@@ -88,14 +89,17 @@ async function getGooglePaymentDataRequest() {
  */
 function onPaymentAuthorized(paymentData: any): Promise<google.payments.api.PaymentAuthorizationResult> {
   return new Promise<google.payments.api.PaymentAuthorizationResult>((resolve) => {
+    console.log('starting payment auth');
     processPayment(paymentData)
       // eslint-disable-next-line promise/always-return
       .then(() => {
+        console.log('starting payment auth success');
         resolve({
           transactionState: 'SUCCESS',
         } as google.payments.api.PaymentAuthorizationResult);
       })
       .catch((error) => {
+        console.log('starting payment auth failed', error.message);
         resolve({
           transactionState: 'ERROR',
           error: {
@@ -107,6 +111,7 @@ function onPaymentAuthorized(paymentData: any): Promise<google.payments.api.Paym
 }
 
 function getGooglePaymentsClient() {
+  console.log('Payments client1', paymentsClient);
   if (paymentsClient === null) {
     paymentsClient = new google.payments.api.PaymentsClient({
       environment: 'TEST',
@@ -115,6 +120,7 @@ function getGooglePaymentsClient() {
       },
     });
   }
+  console.log('Payments client2', paymentsClient);
   return paymentsClient;
 }
 /**
@@ -124,11 +130,14 @@ function getGooglePaymentsClient() {
  * ability to pay.
  */
 async function onGooglePayLoaded() {
+  console.log('ongooglepayloaded');
   const paymentsClient = getGooglePaymentsClient();
   const { allowedPaymentMethods, apiVersion, apiVersionMinor } = await getGooglePayConfig();
   paymentsClient
     .isReadyToPay({ allowedPaymentMethods, apiVersion, apiVersionMinor })
     .then((response) => {
+      console.log('is ready to pay');
+      isGooglePayLoaded = true;
       if (response.result) {
         addGooglePayButton();
       }
@@ -185,6 +194,7 @@ function getGoogleTransactionInfo(countryCode: any) {
  * Show Google Pay payment sheet when Google Pay payment button is clicked
  */
 async function onGooglePaymentButtonClicked() {
+  console.log('on google button clicked');
   const paymentDataRequest = await getGooglePaymentDataRequest();
   const paymentsClient = getGooglePaymentsClient();
   paymentsClient.loadPaymentData(paymentDataRequest);
@@ -280,6 +290,7 @@ async function processPayment(paymentData: any) {
 }
 onMounted(async () => {
   await loadGooglePay().then(() => {
+    // eslint-disable-next-line promise/always-return
     if (google && (paypal as any).Googlepay) {
       const modal = document.querySelector('#resultModal');
       if (modal) {
