@@ -15,21 +15,17 @@ const { loadScript } = usePayPal();
 const { data: cart } = useCart();
 const currency = computed(() => cartGetters.getCurrency(cart.value) || (useAppConfig().fallbackCurrency as string));
 const paypal = await loadScript(currency.value);
-
 const loadGooglePay = async () => {
   return new Promise((resolve, reject) => {
     const scriptElement = document.createElement('script');
     scriptElement.src = 'https://pay.google.com/gp/p/js/pay.js';
     scriptElement.type = 'text/javascript';
     scriptElement.addEventListener('load', resolve);
+    // eslint-disable-next-line unicorn/prefer-add-event-listener
     scriptElement.onerror = reject;
     document.head.append(scriptElement);
   });
 };
-
-/* eslint-disable no-undef */
-/* eslint-disable no-unused-vars */
-
 /**
  * An initialized google.payments.api.PaymentsClient object or null if not yet set
  * An initialized paypal.Googlepay().config() response object or null if not yet set
@@ -38,7 +34,6 @@ const loadGooglePay = async () => {
  */
 let paymentsClient: google.payments.api.PaymentsClient | null = null,
   googlepayConfig: any = null;
-
 /**
  *
  * @returns Fetch the Google Pay Config From PayPal
@@ -50,7 +45,6 @@ async function getGooglePayConfig() {
   }
   return googlepayConfig;
 }
-
 /**
  * Configure support for the Google Pay API
  *
@@ -76,13 +70,10 @@ async function getGooglePaymentDataRequest() {
     callbackIntents,
   };
   const paymentDataRequest = Object.assign({}, baseRequest);
-
   paymentDataRequest.allowedPaymentMethods = allowedPaymentMethods;
   paymentDataRequest.transactionInfo = getGoogleTransactionInfo(countryCode);
   paymentDataRequest.merchantInfo = merchantInfo;
-
   paymentDataRequest.callbackIntents = ['PAYMENT_AUTHORIZATION'];
-
   return paymentDataRequest;
 }
 
@@ -95,24 +86,26 @@ async function getGooglePaymentDataRequest() {
  * @see {@link https://developers.google.com/pay/api/web/reference/response-objects#PaymentAuthorizationResult}
  * @returns Promise<{object}> Promise of PaymentAuthorizationResult object to acknowledge the payment authorization status.
  */
-function onPaymentAuthorized(paymentData: any) {
-  return new Promise(function (resolve, reject) {
+function onPaymentAuthorized(paymentData: any): Promise<google.payments.api.PaymentAuthorizationResult> {
+  return new Promise<google.payments.api.PaymentAuthorizationResult>((resolve) => {
     processPayment(paymentData)
-      .then(function () {
-        resolve({ transactionState: 'SUCCESS' });
+      // eslint-disable-next-line promise/always-return
+      .then(() => {
+        resolve({
+          transactionState: 'SUCCESS',
+        } as google.payments.api.PaymentAuthorizationResult);
       })
-      .catch(function () {
-        resolve({ transactionState: 'ERROR' });
+      .catch((error) => {
+        resolve({
+          transactionState: 'ERROR',
+          error: {
+            message: error.message,
+          },
+        } as google.payments.api.PaymentAuthorizationResult);
       });
   });
 }
 
-/**
- * Return an active PaymentsClient or initialize
- *
- * @see {@link https://developers.google.com/pay/api/web/reference/client#PaymentsClient|PaymentsClient constructor}
- * @returns {google.payments.api.PaymentsClient} Google Pay API client
- */
 function getGooglePaymentsClient() {
   if (paymentsClient === null) {
     paymentsClient = new google.payments.api.PaymentsClient({
@@ -124,7 +117,6 @@ function getGooglePaymentsClient() {
   }
   return paymentsClient;
 }
-
 /**
  * Initialize Google PaymentsClient after Google-hosted JavaScript has loaded
  *
@@ -146,7 +138,6 @@ async function onGooglePayLoaded() {
       console.error(error);
     });
 }
-
 /**
  * Add a Google Pay purchase button alongside an existing checkout button
  *
@@ -163,7 +154,6 @@ function addGooglePayButton() {
     theContainer.append(button);
   }
 }
-
 /**
  * Provide Google Pay API with a payment amount, currency, and amount status
  *
@@ -191,7 +181,6 @@ function getGoogleTransactionInfo(countryCode: any) {
     totalPriceLabel: 'Total',
   };
 }
-
 /**
  * Show Google Pay payment sheet when Google Pay payment button is clicked
  */
@@ -288,18 +277,13 @@ async function processPayment(paymentData: any) {
     }
   }
 }
-
-function prettyPrintJson(json: object): string {
-  return JSON.stringify(json, null, 2);
-}
-
 onMounted(async () => {
   await loadGooglePay().then(() => {
     if (google && (paypal as any).Googlepay) {
       const modal = document.querySelector('#resultModal');
       if (modal) {
         window.addEventListener('click', function (event) {
-          if (event.target == modal && modal instanceof HTMLElement) {
+          if (event.target === modal && modal instanceof HTMLElement) {
             modal.style.display = 'none';
           }
         });
