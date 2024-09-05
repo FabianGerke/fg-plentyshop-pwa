@@ -9,7 +9,7 @@
 
 <script lang="ts" setup>
 import { PayPalAddToCartCallback } from '~/components/PayPal/types';
-import { cartGetters, orderGetters } from '@plentymarkets/shop-api';
+import { cartGetters } from '@plentymarkets/shop-api';
 
 let isGooglePayLoaded = false;
 const { loadScript, executeOrder, createTransaction } = usePayPal();
@@ -221,30 +221,31 @@ async function processPayment(paymentData: any) {
   return new Promise(async (resolve, reject) => {
     try {
       // Create the order on your server
-      const transaction = await createTransaction('applepay');
+      const transaction = await createTransaction('googlepay');
       if (!transaction || !transaction.id) throw new Error('Transaction creation failed.');
-
+      console.log('transaction created', transaction.id);
       const order = await createOrder({
         paymentId: cart.value.methodOfPaymentId,
         shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
       });
       if (!order || !order.order || !order.order.id) throw new Error('Order creation failed.');
+      console.log('order created', order.order.id);
 
-      const confirmOrderResponse = await (paypal as any).Googlepay().confirmOrder({
+      const confirmOrder = await (paypal as any).Googlepay().confirmOrder({
         orderId: order.order.id,
         paymentMethodData: paymentData.paymentMethodData,
         token: paymentData.token,
       });
       /** Capture the Order on your Server */
-      console.log(confirmOrderResponse.status);
+      console.log('status created', confirmOrder.status);
 
-      await executeOrder({
-        mode: 'paypal',
-        plentyOrderId: Number.parseInt(orderGetters.getId(order)),
-        paypalTransactionId: transaction.id,
-      });
+      // await executeOrder({
+      //   mode: 'paypal',
+      //   plentyOrderId: Number.parseInt(orderGetters.getId(order)),
+      //   paypalTransactionId: transaction.id,
+      // });
 
-      if (confirmOrderResponse.status === 'APPROVED') {
+      if (confirmOrder.status === 'APPROVED') {
         const response = await fetch(`/capture/${transaction.id}`, {
           method: 'POST',
         }).then((res) => res.json());
