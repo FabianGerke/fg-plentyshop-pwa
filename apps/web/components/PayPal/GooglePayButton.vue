@@ -12,6 +12,7 @@ import { PayPalAddToCartCallback } from '~/components/PayPal/types';
 import { cartGetters, orderGetters } from '@plentymarkets/shop-api';
 
 let isGooglePayLoaded = false;
+let countryCodeString = 'DE';
 const { loadScript, executeOrder, createTransaction, captureOrder } = usePayPal();
 const { shippingPrivacyAgreement } = useAdditionalInformation();
 const { createOrder } = useMakeOrder();
@@ -54,11 +55,11 @@ async function getGooglePaymentDataRequest() {
     transactionInfo,
     callbackIntents,
   } = await getGooglePayConfig();
+  countryCodeString = countryCode;
   const baseRequest = {
     apiVersion,
     apiVersionMinor,
     allowedPaymentMethods,
-    countryCode,
     transactionInfo,
     merchantInfo,
     callbackIntents,
@@ -132,7 +133,7 @@ function addGooglePayButton() {
 
 function getGoogleTransactionInfo() {
   return {
-    countryCode: googlepayConfig.countryCode,
+    countryCode: countryCodeString,
     currencyCode: currency.value,
     totalPriceStatus: 'FINAL',
     totalPrice: cartGetters.getTotals(cart.value).total.toString(),
