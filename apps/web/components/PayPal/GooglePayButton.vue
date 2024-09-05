@@ -9,10 +9,11 @@
 
 <script lang="ts" setup>
 import { PayPalAddToCartCallback } from '~/components/PayPal/types';
-import { cartGetters } from '@plentymarkets/shop-api';
+import { cartGetters, orderGetters } from '@plentymarkets/shop-api';
 
 let isGooglePayLoaded = false;
 const { loadScript, executeOrder, createTransaction } = usePayPal();
+const { shippingPrivacyAgreement } = useAdditionalInformation();
 const { createOrder } = useMakeOrder();
 const { data: cart } = useCart();
 const currency = computed(() => cartGetters.getCurrency(cart.value) || (useAppConfig().fallbackCurrency as string));
@@ -223,18 +224,20 @@ async function processPayment(paymentData: any) {
     if (modal) {
       resultElement.innerHTML = '';
       try {
-        const { id } = await fetch(`/api/orders`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }).then((res) => res.json());
+        const transaction = await createTransaction('googlepay');
+        if (!transaction || !transaction.id) throw new Error('Transaction creation failed.');
+        const order = await createOrder({
+          paymentId: cart.value.methodOfPaymentId,
+          shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
+        });
+        if (!order || !order.order || !order.order.id) throw new Error('Order creation failed.');
 
         console.log(' ===== Order Created ===== ');
         /** Approve Payment */
 
         const { status } = await (paypal as any).Googlepay().confirmOrder({
-          orderId: id,
+          orderId: transaction.id,
+          token: paymentData.token,
           paymentMethodData: paymentData.paymentMethodData,
         });
 
@@ -242,12 +245,12 @@ async function processPayment(paymentData: any) {
           console.log(' ===== Confirm Payment Completed Payer Action Required ===== ');
           (paypal as any)
             .Googlepay()
-            .initiatePayerAction({ orderId: id })
+            .initiatePayerAction({ orderId: order.order.id })
             .then(async () => {
               /**
                *  GET Order
                */
-              const orderResponse = await fetch(`/api/orders/${id}`, {
+              const orderResponse = await fetch(`/api/orders/${order.order.id}`, {
                 method: 'GET',
               }).then((res) => res.json());
 
@@ -261,28 +264,33 @@ async function processPayment(paymentData: any) {
                 modal.style.display = 'block';
                 resultElement.classList.add('spinner');
               }
-              const captureResponse = await fetch(`/api/orders/${id}/capture`, {
-                method: 'POST',
-              }).then((res) => res.json());
+              const captureResponse = await executeOrder({
+                mode: 'paypal',
+                plentyOrderId: Number.parseInt(orderGetters.getId(order)),
+                paypalTransactionId: transaction.id,
+              });
 
-              console.log(' ===== Order Capture Completed ===== ');
+              console.log(' ===== Order Capture Completed =====', captureResponse);
               resultElement.classList.remove('spinner');
-              resultElement.innerHTML = captureResponse;
+              // resultElement.innerHTML = captureResponse;
             });
         } else {
           /*
            * CAPTURE THE ORDER
            */
 
-          const response = await fetch(`/api/orders/${id}/capture`, {
-            method: 'POST',
-          }).then((res) => res.json());
+          // eslint-disable-next-line no-unused-vars
+          const response = await executeOrder({
+            mode: 'paypal',
+            plentyOrderId: Number.parseInt(orderGetters.getId(order)),
+            paypalTransactionId: transaction.id,
+          });
 
           console.log(' ===== Order Capture Completed ===== ');
           if (modal instanceof HTMLElement) {
             modal.style.display = 'block';
           }
-          resultElement.innerHTML = response;
+          // resultElement.innerHTML = response;
         }
 
         return { transactionState: 'SUCCESS' };
@@ -290,6 +298,7 @@ async function processPayment(paymentData: any) {
         return {
           transactionState: 'ERROR',
           error: {
+            // eslint-disable-next-line max-lines
             message: error.message,
           },
         };
