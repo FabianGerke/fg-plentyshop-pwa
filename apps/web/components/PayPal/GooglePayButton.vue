@@ -106,11 +106,11 @@ function getGooglePaymentsClient() {
 
 async function onGooglePayLoaded() {
   const paymentsClient = getGooglePaymentsClient();
-  const { allowedPaymentMethods, apiVersion, apiVersionMinor } = await getGooglePayConfig();
+  const { allowedPaymentMethods, apiVersion, apiVersionMinor, isEligible } = await getGooglePayConfig();
+  isGooglePayLoaded = isEligible;
   paymentsClient
     .isReadyToPay({ allowedPaymentMethods, apiVersion, apiVersionMinor })
     .then((response) => {
-      isGooglePayLoaded = true;
       if (response.result) {
         addGooglePayButton();
       }
