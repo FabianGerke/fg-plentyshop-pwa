@@ -9,7 +9,7 @@
 
 <script lang="ts" setup>
 import { PayPalAddToCartCallback } from '~/components/PayPal/types';
-import { cartGetters } from '@plentymarkets/shop-api';
+import { cartGetters, orderGetters } from '@plentymarkets/shop-api';
 
 let isGooglePayLoaded = false;
 const { loadScript, executeOrder, createTransaction } = usePayPal();
@@ -216,69 +216,83 @@ async function onGooglePaymentButtonClicked() {
  * @param {object} paymentData response from Google Pay API after user approves payment
  * @see {@link https://developers.google.com/pay/api/web/reference/response-objects#PaymentData|PaymentData object reference}
  */
-
 async function processPayment(paymentData: any) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      // Create the order on your server
-      const transaction = await createTransaction('paypal');
-      if (!transaction || !transaction.id) throw new Error('Transaction creation failed.');
-      console.log('transaction created', transaction.id);
-      const order = await createOrder({
-        paymentId: cart.value.methodOfPaymentId,
-        shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
-      });
-      if (!order || !order.order || !order.order.id) throw new Error('Order creation failed.');
-      console.log('order created', order.order.id);
+  console.log('process payment');
+  try {
+    const transaction = await createTransaction('googlepay');
+    if (!transaction || !transaction.id) throw new Error('Transaction creation failed.');
+    const order = await createOrder({
+      paymentId: cart.value.methodOfPaymentId,
+      shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
+    });
+    if (!order || !order.order || !order.order.id) throw new Error('Order creation failed.');
 
-      const confirmOrder = await (paypal as any).Googlepay().confirmOrder({
-        orderId: order.order.id,
-        paymentMethodData: paymentData.paymentMethodData,
-        token: paymentData.token,
-      });
-      /** Capture the Order on your Server */
-      console.log('status created', confirmOrder.status);
+    console.log(' ===== Order Created ===== ');
+    /** Approve Payment */
 
-      // await executeOrder({
-      //   mode: 'paypal',
-      //   plentyOrderId: Number.parseInt(orderGetters.getId(order)),
-      //   paypalTransactionId: transaction.id,
-      // });
+    const { status } = await (paypal as any).Googlepay().confirmOrder({
+      orderId: transaction.id,
+      token: paymentData.token,
+      paymentMethodData: paymentData.paymentMethodData,
+    });
 
-      if (confirmOrder.status === 'APPROVED') {
-        const response = await fetch(`/capture/${transaction.id}`, {
-          method: 'POST',
-        }).then((res) => res.json());
-        if (response.capture.status === 'COMPLETED') resolve({ transactionState: 'SUCCESS' });
-        else
-          resolve({
-            transactionState: 'ERROR',
-            error: {
-              intent: 'PAYMENT_AUTHORIZATION',
-              message: 'TRANSACTION FAILED',
-            },
+    if (status === 'PAYER_ACTION_REQUIRED') {
+      console.log(' ===== Confirm Payment Completed Payer Action Required ===== ');
+      (paypal as any)
+        .Googlepay()
+        .initiatePayerAction({ orderId: order.order.id })
+        .then(async () => {
+          /**
+           *  GET Order
+           */
+          const orderResponse = await fetch(`/api/orders/${order.order.id}`, {
+            method: 'GET',
+          }).then((res) => res.json());
+
+          console.log(' ===== 3DS Contingency Result Fetched ===== ');
+          console.log(orderResponse?.payment_source?.google_pay?.card?.authentication_result);
+          /*
+           * CAPTURE THE ORDER
+           */
+          console.log(' ===== Payer Action Completed ===== ');
+
+          const captureResponse = await executeOrder({
+            mode: 'paypal',
+            plentyOrderId: Number.parseInt(orderGetters.getId(order)),
+            paypalTransactionId: transaction.id,
           });
-      } else {
-        resolve({
-          transactionState: 'ERROR',
-          error: {
-            intent: 'PAYMENT_AUTHORIZATION',
-            message: 'TRANSACTION FAILED',
-          },
-        });
-      }
-    } catch (error: any) {
-      resolve({
-        transactionState: 'ERROR',
-        error: {
-          intent: 'PAYMENT_AUTHORIZATION',
-          message: error.message,
-        },
-      });
-    }
-  });
-}
 
+          console.log(' ===== Order Capture Completed =====', captureResponse);
+          // resultElement.innerHTML = captureResponse;
+        });
+    } else {
+      /*
+       * CAPTURE THE ORDER
+       */
+
+      // eslint-disable-next-line no-unused-vars
+      const response = await executeOrder({
+        mode: 'paypal',
+        plentyOrderId: Number.parseInt(orderGetters.getId(order)),
+        paypalTransactionId: transaction.id,
+      });
+
+      console.log(' ===== Order Capture Completed ===== ');
+
+      // resultElement.innerHTML = response;
+    }
+
+    return { transactionState: 'SUCCESS' };
+  } catch (error: any) {
+    return {
+      transactionState: 'ERROR',
+      error: {
+        // eslint-disable-next-line max-lines
+        message: error.message,
+      },
+    };
+  }
+}
 onMounted(async () => {
   await loadGooglePay().then(() => {
     // eslint-disable-next-line promise/always-return
