@@ -219,15 +219,16 @@ async function onGooglePaymentButtonClicked() {
 async function processPayment(paymentData: any) {
   console.log('process payment');
   try {
-    const transaction = await createTransaction('googlepay');
+    const transaction = await createTransaction('paypal');
     if (!transaction || !transaction.id) throw new Error('Transaction creation failed.');
+    console.log('transaction', transaction);
     const order = await createOrder({
       paymentId: cart.value.methodOfPaymentId,
       shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
     });
     if (!order || !order.order || !order.order.id) throw new Error('Order creation failed.');
 
-    console.log(' ===== Order Created ===== ');
+    console.log(' ===== Order Created =====', order);
     /** Approve Payment */
 
     const { status } = await (paypal as any).Googlepay().confirmOrder({
@@ -235,6 +236,7 @@ async function processPayment(paymentData: any) {
       token: paymentData.token,
       paymentMethodData: paymentData.paymentMethodData,
     });
+    console.log(' ===== Order Created =====', status);
 
     if (status === 'PAYER_ACTION_REQUIRED') {
       console.log(' ===== Confirm Payment Completed Payer Action Required ===== ');
@@ -276,10 +278,7 @@ async function processPayment(paymentData: any) {
         plentyOrderId: Number.parseInt(orderGetters.getId(order)),
         paypalTransactionId: transaction.id,
       });
-
       console.log(' ===== Order Capture Completed ===== ');
-
-      // resultElement.innerHTML = response;
     }
 
     return { transactionState: 'SUCCESS' };
@@ -297,14 +296,6 @@ onMounted(async () => {
   await loadGooglePay().then(() => {
     // eslint-disable-next-line promise/always-return
     if (google && (paypal as any).Googlepay) {
-      const modal = document.querySelector('#resultModal');
-      if (modal) {
-        window.addEventListener('click', function (event) {
-          if (event.target === modal && modal instanceof HTMLElement) {
-            modal.style.display = 'none';
-          }
-        });
-      }
       onGooglePayLoaded().catch(console.error);
     }
   });
