@@ -106,8 +106,7 @@ function getGooglePaymentsClient() {
 
 async function onGooglePayLoaded() {
   const paymentsClient = getGooglePaymentsClient();
-  const { allowedPaymentMethods, apiVersion, apiVersionMinor, isEligible } = await getGooglePayConfig();
-  isGooglePayLoaded = isEligible;
+  const { allowedPaymentMethods, apiVersion, apiVersionMinor } = await getGooglePayConfig();
   paymentsClient
     .isReadyToPay({ allowedPaymentMethods, apiVersion, apiVersionMinor })
     .then((response) => {
@@ -128,6 +127,7 @@ function addGooglePayButton() {
   const theContainer = document.querySelector('#google-pay-button');
   if (theContainer) {
     theContainer.append(button);
+    isGooglePayLoaded = true;
   }
 }
 
