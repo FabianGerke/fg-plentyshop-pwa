@@ -110,6 +110,7 @@ async function onGooglePayLoaded() {
   paymentsClient
     .isReadyToPay({ allowedPaymentMethods, apiVersion, apiVersionMinor })
     .then((response) => {
+      // eslint-disable-next-line promise/always-return
       if (response.result) {
         addGooglePayButton();
       }
@@ -167,9 +168,11 @@ async function processPayment(paymentData: any) {
     });
 
     if (status === 'PAYER_ACTION_REQUIRED') {
+      // eslint-disable-next-line promise/catch-or-return
       (paypal as any)
         .Googlepay()
         .initiatePayerAction({ orderId: order.order.id })
+        // eslint-disable-next-line promise/always-return
         .then(async (data: any) => {
           await captureOrder({
             paypalOrderId: data.paypalOrderId,
