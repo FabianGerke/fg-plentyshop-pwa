@@ -12,12 +12,13 @@ import { PayPalAddToCartCallback } from '~/components/PayPal/types';
 import { cartGetters, orderGetters } from '@plentymarkets/shop-api';
 
 let isGooglePayLoaded = false;
-const { loadScript, executeOrder, createTransaction } = usePayPal();
+const { loadScript, executeOrder, createTransaction, captureOrder } = usePayPal();
 const { shippingPrivacyAgreement } = useAdditionalInformation();
 const { createOrder } = useMakeOrder();
-const { data: cart } = useCart();
+const { data: cart, clearCartItems } = useCart();
 const currency = computed(() => cartGetters.getCurrency(cart.value) || (useAppConfig().fallbackCurrency as string));
 const paypal = await loadScript(currency.value);
+const localePath = useLocalePath();
 const emits = defineEmits<{
   (event: 'button-clicked', callback: PayPalAddToCartCallback): Promise<void>;
 }>();
@@ -243,28 +244,27 @@ async function processPayment(paymentData: any) {
       (paypal as any)
         .Googlepay()
         .initiatePayerAction({ orderId: order.order.id })
-        .then(async () => {
+        .then(async (data: any) => {
           /**
            *  GET Order
            */
-          const orderResponse = await fetch(`/api/orders/${order.order.id}`, {
-            method: 'GET',
-          }).then((res) => res.json());
+          await captureOrder({
+            paypalOrderId: data.paypalOrderId,
+            paypalPayerId: data.paypalPayerId,
+          });
+
+          await executeOrder({
+            mode: 'paypal',
+            plentyOrderId: Number.parseInt(orderGetters.getId(order)),
+            paypalTransactionId: data.orderID,
+          });
 
           console.log(' ===== 3DS Contingency Result Fetched ===== ');
-          console.log(orderResponse?.payment_source?.google_pay?.card?.authentication_result);
           /*
            * CAPTURE THE ORDER
            */
           console.log(' ===== Payer Action Completed ===== ');
 
-          const captureResponse = await executeOrder({
-            mode: 'paypal',
-            plentyOrderId: Number.parseInt(orderGetters.getId(order)),
-            paypalTransactionId: transaction.id,
-          });
-
-          console.log(' ===== Order Capture Completed =====', captureResponse);
           // resultElement.innerHTML = captureResponse;
         });
     } else {
@@ -280,6 +280,9 @@ async function processPayment(paymentData: any) {
       });
       console.log(' ===== Order Capture Completed ===== ');
     }
+    clearCartItems();
+
+    navigateTo(localePath(paths.confirmation + '/' + order.order.id + '/' + order.order.accessKey));
 
     return { transactionState: 'SUCCESS' };
   } catch (error: any) {
@@ -294,7 +297,7 @@ async function processPayment(paymentData: any) {
 }
 onMounted(async () => {
   await loadGooglePay().then(() => {
-    // eslint-disable-next-line promise/always-return
+    // eslint-disable-next-line promise/always-return,max-lines
     if (google && (paypal as any).Googlepay) {
       onGooglePayLoaded().catch(console.error);
     }
