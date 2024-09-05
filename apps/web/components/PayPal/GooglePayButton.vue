@@ -221,7 +221,7 @@ async function processPayment(paymentData: any) {
   return new Promise(async (resolve, reject) => {
     try {
       // Create the order on your server
-      const transaction = await createTransaction('googlepay');
+      const transaction = await createTransaction('paypal');
       if (!transaction || !transaction.id) throw new Error('Transaction creation failed.');
       console.log('transaction created', transaction.id);
       const order = await createOrder({
