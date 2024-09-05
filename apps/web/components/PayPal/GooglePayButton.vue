@@ -216,96 +216,68 @@ async function onGooglePaymentButtonClicked() {
  * @param {object} paymentData response from Google Pay API after user approves payment
  * @see {@link https://developers.google.com/pay/api/web/reference/response-objects#PaymentData|PaymentData object reference}
  */
+
 async function processPayment(paymentData: any) {
-  console.log('process payment');
-  const resultElement = document.querySelector('#result');
-  if (resultElement) {
-    const modal = document.querySelector('#resultModal');
-    if (modal) {
-      resultElement.innerHTML = '';
-      try {
-        const transaction = await createTransaction('googlepay');
-        if (!transaction || !transaction.id) throw new Error('Transaction creation failed.');
-        const order = await createOrder({
-          paymentId: cart.value.methodOfPaymentId,
-          shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
-        });
-        if (!order || !order.order || !order.order.id) throw new Error('Order creation failed.');
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Create the order on your server
+      const transaction = await createTransaction('applepay');
+      if (!transaction || !transaction.id) throw new Error('Transaction creation failed.');
 
-        console.log(' ===== Order Created ===== ');
-        /** Approve Payment */
+      const order = await createOrder({
+        paymentId: cart.value.methodOfPaymentId,
+        shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
+      });
+      if (!order || !order.order || !order.order.id) throw new Error('Order creation failed.');
 
-        const { status } = await (paypal as any).Googlepay().confirmOrder({
-          orderId: transaction.id,
-          token: paymentData.token,
-          paymentMethodData: paymentData.paymentMethodData,
-        });
+      const confirmOrderResponse = await (paypal as any).Googlepay().confirmOrder({
+        orderId: order.order.id,
+        paymentMethodData: paymentData.paymentMethodData,
+        token: paymentData.token,
+      });
+      /** Capture the Order on your Server */
+      console.log(confirmOrderResponse.status);
 
-        if (status === 'PAYER_ACTION_REQUIRED') {
-          console.log(' ===== Confirm Payment Completed Payer Action Required ===== ');
-          (paypal as any)
-            .Googlepay()
-            .initiatePayerAction({ orderId: order.order.id })
-            .then(async () => {
-              /**
-               *  GET Order
-               */
-              const orderResponse = await fetch(`/api/orders/${order.order.id}`, {
-                method: 'GET',
-              }).then((res) => res.json());
+      await executeOrder({
+        mode: 'paypal',
+        plentyOrderId: Number.parseInt(orderGetters.getId(order)),
+        paypalTransactionId: transaction.id,
+      });
 
-              console.log(' ===== 3DS Contingency Result Fetched ===== ');
-              console.log(orderResponse?.payment_source?.google_pay?.card?.authentication_result);
-              /*
-               * CAPTURE THE ORDER
-               */
-              console.log(' ===== Payer Action Completed ===== ');
-              if (modal instanceof HTMLElement) {
-                modal.style.display = 'block';
-                resultElement.classList.add('spinner');
-              }
-              const captureResponse = await executeOrder({
-                mode: 'paypal',
-                plentyOrderId: Number.parseInt(orderGetters.getId(order)),
-                paypalTransactionId: transaction.id,
-              });
-
-              console.log(' ===== Order Capture Completed =====', captureResponse);
-              resultElement.classList.remove('spinner');
-              // resultElement.innerHTML = captureResponse;
-            });
-        } else {
-          /*
-           * CAPTURE THE ORDER
-           */
-
-          // eslint-disable-next-line no-unused-vars
-          const response = await executeOrder({
-            mode: 'paypal',
-            plentyOrderId: Number.parseInt(orderGetters.getId(order)),
-            paypalTransactionId: transaction.id,
+      if (confirmOrderResponse.status === 'APPROVED') {
+        const response = await fetch(`/capture/${transaction.id}`, {
+          method: 'POST',
+        }).then((res) => res.json());
+        if (response.capture.status === 'COMPLETED') resolve({ transactionState: 'SUCCESS' });
+        else
+          resolve({
+            transactionState: 'ERROR',
+            error: {
+              intent: 'PAYMENT_AUTHORIZATION',
+              message: 'TRANSACTION FAILED',
+            },
           });
-
-          console.log(' ===== Order Capture Completed ===== ');
-          if (modal instanceof HTMLElement) {
-            modal.style.display = 'block';
-          }
-          // resultElement.innerHTML = response;
-        }
-
-        return { transactionState: 'SUCCESS' };
-      } catch (error: any) {
-        return {
+      } else {
+        resolve({
           transactionState: 'ERROR',
           error: {
-            // eslint-disable-next-line max-lines
-            message: error.message,
+            intent: 'PAYMENT_AUTHORIZATION',
+            message: 'TRANSACTION FAILED',
           },
-        };
+        });
       }
+    } catch (error: any) {
+      resolve({
+        transactionState: 'ERROR',
+        error: {
+          intent: 'PAYMENT_AUTHORIZATION',
+          message: error.message,
+        },
+      });
     }
-  }
+  });
 }
+
 onMounted(async () => {
   await loadGooglePay().then(() => {
     // eslint-disable-next-line promise/always-return
