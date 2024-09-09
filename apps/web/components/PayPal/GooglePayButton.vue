@@ -108,17 +108,15 @@ function getGooglePaymentsClient() {
 async function onGooglePayLoaded() {
   const paymentsClient = getGooglePaymentsClient();
   const { allowedPaymentMethods, apiVersion, apiVersionMinor } = await getGooglePayConfig();
-  paymentsClient
-    .isReadyToPay({ allowedPaymentMethods, apiVersion, apiVersionMinor })
-    .then((response) => {
-      // eslint-disable-next-line promise/always-return
-      if (response.result) {
-        addGooglePayButton();
-      }
-    })
-    .catch(function (error) {
-      console.error(error);
-    });
+  try {
+    const response = await paymentsClient.isReadyToPay({ allowedPaymentMethods, apiVersion, apiVersionMinor });
+    isGooglePayLoaded = response.result;
+    if (response.result) {
+      addGooglePayButton();
+    }
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 function addGooglePayButton() {
