@@ -42,10 +42,7 @@ async function getGooglePayConfig() {
   if (googlepayConfig === null) {
     googlepayConfig = await (paypal as any).Googlepay().config();
   }
-  console.log('googleconfig', googlepayConfig);
-  if (googlepayConfig) {
-    isGooglePayLoaded = true;
-  }
+  isGooglePayLoaded = googlepayConfig.isEligible;
   return googlepayConfig;
 }
 
