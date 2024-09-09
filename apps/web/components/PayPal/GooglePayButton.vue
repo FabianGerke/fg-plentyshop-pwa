@@ -42,6 +42,10 @@ async function getGooglePayConfig() {
   if (googlepayConfig === null) {
     googlepayConfig = await (paypal as any).Googlepay().config();
   }
+  console.log('googleconfig', googlepayConfig);
+  if (googlepayConfig) {
+    isGooglePayLoaded = true;
+  }
   return googlepayConfig;
 }
 
@@ -128,7 +132,6 @@ function addGooglePayButton() {
   const theContainer = document.querySelector('#google-pay-button');
   if (theContainer) {
     theContainer.append(button);
-    isGooglePayLoaded = true;
   }
 }
 
