@@ -11,7 +11,7 @@
 import { PayPalAddToCartCallback } from '~/components/PayPal/types';
 import { cartGetters, orderGetters } from '@plentymarkets/shop-api';
 
-let isGooglePayLoaded = false;
+let isGooglePayLoaded = true;
 let countryCodeString = 'DE';
 const { loadScript, executeOrder, createTransaction, captureOrder } = usePayPal();
 const { shippingPrivacyAgreement } = useAdditionalInformation();
@@ -109,10 +109,9 @@ async function onGooglePayLoaded() {
   const { allowedPaymentMethods, apiVersion, apiVersionMinor } = await getGooglePayConfig();
   try {
     const response = await paymentsClient.isReadyToPay({ allowedPaymentMethods, apiVersion, apiVersionMinor });
+    isGooglePayLoaded = response.result;
     if (response.result) {
       addGooglePayButton();
-      console.log('is googlepay ready');
-      isGooglePayLoaded = true;
     }
   } catch (error) {
     console.error(error);
