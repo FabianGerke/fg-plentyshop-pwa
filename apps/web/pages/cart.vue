@@ -26,7 +26,14 @@
           >
             {{ $t('goToCheckout') }}
           </UiButton>
-          <PayPalExpressButton :disabled="loading" class="mt-4" type="CartPreview" />
+          <Suspense>
+            <template #default>
+              <PayPalExpressButton :disabled="loading" class="mt-4" type="CartPreview" />
+            </template>
+            <template #fallback>
+              <SfLoaderCircular class="flex justify-center items-center" size="sm" />
+            </template>
+          </Suspense>
         </OrderSummary>
       </div>
     </div>

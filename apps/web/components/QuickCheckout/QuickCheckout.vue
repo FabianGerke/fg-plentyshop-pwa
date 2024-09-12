@@ -83,7 +83,14 @@
         </UiButton>
         <div v-if="isAvailable">
           <OrDivider class="my-4" />
-          <PayPalExpressButton class="w-full text-center" type="CartPreview" />
+          <Suspense>
+            <template #default>
+              <PayPalExpressButton class="w-full text-center" type="CartPreview" />
+            </template>
+            <template #fallback>
+              <SfLoaderCircular class="flex justify-center items-center" size="sm" />
+            </template>
+          </Suspense>
         </div>
       </div>
     </div>
@@ -91,7 +98,7 @@
 </template>
 
 <script setup lang="ts">
-import { SfIconClose } from '@storefront-ui/vue';
+import { SfIconClose, SfLoaderCircular } from '@storefront-ui/vue';
 import type { QuickCheckoutProps } from './types';
 import { cartGetters, productGetters } from '@plentymarkets/shop-api';
 import ProductPrice from '~/components/ProductPrice/ProductPrice.vue';

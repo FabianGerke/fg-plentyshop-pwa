@@ -13,7 +13,14 @@
         </UiButton>
         <OrDivider />
         <div v-if="isAvailable">
-          <PayPalExpressButton v-if="!loginSubmit" class="mt-4" type="CartPreview" />
+          <Suspense>
+            <template #default>
+              <PayPalExpressButton v-if="!loginSubmit" class="mt-4" type="CartPreview" />
+            </template>
+            <template #fallback>
+              <SfLoaderCircular class="flex justify-center items-center" size="sm" />
+            </template>
+          </Suspense>
           <OrDivider />
         </div>
         <div class="w-[400px] mt-4">
