@@ -1,3 +1,16 @@
+import type { MakeOrderParams } from '@plentymarkets/shop-api';
+export interface ExtendedMakeOrderParams extends MakeOrderParams {
+  payment_source?: {
+    google_pay?: {
+      attributes?: {
+        verification?: {
+          method?: string; // e.g., 'SCA_ALWAYS'
+        };
+      };
+    };
+  };
+}
+
 export type PaypalButtonPropsType = {
   type: string;
   disabled?: boolean;
@@ -137,14 +150,4 @@ export type GooglePayPayerActionData = {
   paypalOrderId: string;
   paypalPayerId: string;
   orderID: string;
-};
-
-export type AllowedPaymentMethod = {
-  type: string;
-  parameters: {
-    cardOptions: {
-      assuranceDetailsRequired?: boolean;
-      challenge?: string;
-    };
-  };
 };
