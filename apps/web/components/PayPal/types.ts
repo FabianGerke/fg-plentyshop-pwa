@@ -138,3 +138,13 @@ export type GooglePayPayerActionData = {
   paypalPayerId: string;
   orderID: string;
 };
+
+export type AllowedPaymentMethod = {
+  type: string;
+  parameters: {
+    cardOptions: {
+      assuranceDetailsRequired?: boolean;
+      challenge?: string;
+    };
+  };
+};
