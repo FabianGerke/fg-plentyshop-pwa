@@ -132,3 +132,9 @@ export type GooglepayType = {
   validateMerchant(argument0: ValidateMerchantParams): Promise<ValidateMerchantResponse>;
   confirmOrder(argument0: ConfirmOrderParams): Promise<void>;
 };
+
+export type GooglePayPayerActionData = {
+  paypalOrderId: string;
+  paypalPayerId: string;
+  orderID: string;
+};
