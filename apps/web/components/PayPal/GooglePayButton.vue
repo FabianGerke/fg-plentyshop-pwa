@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ExtendedMakeOrderParams, GooglePayPayerActionData, PayPalAddToCartCallback } from '~/components/PayPal/types';
+import { GooglePayPayerActionData, PayPalAddToCartCallback } from '~/components/PayPal/types';
 import { cartGetters, orderGetters } from '@plentymarkets/shop-api';
 
 let isGooglePayLoaded = true;
@@ -138,6 +138,15 @@ function getGoogleTransactionInfo() {
     currencyCode: currency.value,
     totalPriceStatus: 'FINAL',
     totalPrice: cartGetters.getTotals(cart.value).total.toString(),
+    payment_source: {
+      card: {
+        attributes: {
+          verification: {
+            method: 'SCA_ALWAYS',
+          },
+        },
+      },
+    },
   };
 }
 
@@ -148,6 +157,7 @@ async function onGooglePaymentButtonClicked() {
       const paymentsClient = getGooglePaymentsClient();
       paymentsClient
         .loadPaymentData(paymentDataRequest)
+        // eslint-disable-next-line promise/always-return
         .then(function (paymentData) {
           processPayment(paymentData);
         })
@@ -167,16 +177,7 @@ async function processPayment(paymentData: google.payments.api.PaymentData) {
     const order = await createOrder({
       paymentId: cart.value.methodOfPaymentId,
       shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
-      payment_source: {
-        google_pay: {
-          attributes: {
-            verification: {
-              method: 'SCA_ALWAYS',
-            },
-          },
-        },
-      },
-    } as ExtendedMakeOrderParams);
+    });
     if (!order || !order.order || !order.order.id) throw new Error('Order creation failed.');
 
     const { status } = await (paypal as any).Googlepay().confirmOrder({
