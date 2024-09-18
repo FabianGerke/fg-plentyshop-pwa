@@ -57,6 +57,15 @@ async function getGooglePaymentDataRequest() {
   } = await getGooglePayConfig();
 
   countryCodeString = countryCode;
+
+  // Ensure SCA is enforced for allowed payment methods
+  allowedPaymentMethods.forEach((method: any) => {
+    method.parameters = method.parameters || {};
+    method.parameters.cardOptions = method.parameters.cardOptions || {};
+    method.parameters.cardOptions.assuranceDetailsRequired = true; // Ensure 3DS
+    method.parameters.cardOptions.challenge = 'sca_always'; // Enforce SCA Always
+  });
+
   const baseRequest = {
     apiVersion,
     apiVersionMinor,
@@ -70,6 +79,7 @@ async function getGooglePaymentDataRequest() {
   paymentDataRequest.transactionInfo = getGoogleTransactionInfo();
   paymentDataRequest.merchantInfo = merchantInfo;
   // paymentDataRequest.callbackIntents = ['PAYMENT_AUTHORIZATION'];
+  console.log(paymentDataRequest);
   return paymentDataRequest;
 }
 
@@ -138,15 +148,6 @@ function getGoogleTransactionInfo() {
     currencyCode: currency.value,
     totalPriceStatus: 'FINAL',
     totalPrice: cartGetters.getTotals(cart.value).total.toString(),
-    payment_source: {
-      card: {
-        attributes: {
-          verification: {
-            method: 'SCA_ALWAYS',
-          },
-        },
-      },
-    },
   };
 }
 
