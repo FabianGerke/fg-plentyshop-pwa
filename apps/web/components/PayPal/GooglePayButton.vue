@@ -56,7 +56,6 @@ async function getGooglePaymentDataRequest() {
     callbackIntents,
   } = await getGooglePayConfig();
   countryCodeString = countryCode;
-
   const baseRequest = {
     apiVersion,
     apiVersionMinor,
@@ -69,7 +68,7 @@ async function getGooglePaymentDataRequest() {
   paymentDataRequest.allowedPaymentMethods = allowedPaymentMethods;
   paymentDataRequest.transactionInfo = getGoogleTransactionInfo();
   paymentDataRequest.merchantInfo = merchantInfo;
-  // paymentDataRequest.callbackIntents = ['PAYMENT_AUTHORIZATION'];
+  paymentDataRequest.callbackIntents = ['PAYMENT_AUTHORIZATION'];
   return paymentDataRequest;
 }
 
@@ -99,9 +98,9 @@ function getGooglePaymentsClient() {
   if (paymentsClient === null) {
     paymentsClient = new google.payments.api.PaymentsClient({
       environment: 'TEST',
-      // paymentDataCallbacks: {
-      //   onPaymentAuthorized: onPaymentAuthorized,
-      // },
+      paymentDataCallbacks: {
+        onPaymentAuthorized: onPaymentAuthorized,
+      },
     });
   }
   return paymentsClient;
@@ -146,10 +145,7 @@ async function onGooglePaymentButtonClicked() {
     if (successfully) {
       const paymentDataRequest = await getGooglePaymentDataRequest();
       const paymentsClient = getGooglePaymentsClient();
-      // eslint-disable-next-line promise/catch-or-return,promise/always-return
-      paymentsClient.loadPaymentData(paymentDataRequest).then((paymentData) => {
-        processPayment(paymentData);
-      });
+      paymentsClient.loadPaymentData(paymentDataRequest);
     }
   });
 }
