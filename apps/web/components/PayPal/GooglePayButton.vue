@@ -168,9 +168,11 @@ async function onGooglePaymentButtonClicked() {
 }
 async function processPayment(paymentData: google.payments.api.PaymentData) {
   try {
+    console.log('paymentData', paymentData);
     const transaction = await createCreditCardTransaction();
     console.log('transaction', transaction);
     if (!transaction || !transaction.id) throw new Error('Transaction creation failed.');
+
     const { status } = await (paypal as any).Googlepay().confirmOrder({
       orderId: transaction.id,
       paymentMethodData: paymentData.paymentMethodData,
@@ -203,6 +205,7 @@ async function processPayment(paymentData: google.payments.api.PaymentData) {
 
     return { transactionState: 'SUCCESS' };
   } catch (error: unknown) {
+    console.error('Error during payment process:', error);
     return {
       transactionState: 'ERROR',
       error: {
