@@ -4237,7 +4237,7 @@ __metadata:
     "@nuxt/test-utils": ^3.13.1
     "@nuxtjs/turnstile": ^0.8.0
     "@paypal/paypal-js": 8.1.0
-    "@plentymarkets/shop-api": ^0.68.1
+    "@plentymarkets/shop-api": ^0.68.2
     "@types/applepayjs": ^14.0.8
     "@types/googlepay": ^0.7.6
     "@types/uuid": ^9.0.8
@@ -4271,14 +4271,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@plentymarkets/shop-api@npm:^0.68.1":
-  version: 0.68.1
-  resolution: "@plentymarkets/shop-api@npm:0.68.1::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40plentymarkets%2Fshop-api%2F0.68.1%2Fb8c105dc3e1df3a0b2ef6da4a70839fd0e7ca569"
+"@plentymarkets/shop-api@npm:^0.68.2":
+  version: 0.68.2
+  resolution: "@plentymarkets/shop-api@npm:0.68.2::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40plentymarkets%2Fshop-api%2F0.68.2%2F172883821ab9f8e83f9c89ebb957733a5de53e06"
   dependencies:
     "@vue-storefront/middleware": ^3.10.0
     axios: ^1.7.7
     consola: ^3.2.3
-  checksum: 5027943d7ec00d3fa79e0ab18bba9bdcca50141bb43ea4060309829dbb2e5e09e646e98168fc01ba8687801599f1e54b4944c5a90e567ed91248fe215c146a80
+  checksum: 18e3d3bf90b01f48f87564f74d00a7f9384609a14650c8b7b3d8823d0201834eb90ed1c48f5d041c1e31210016cf7cfd3beef25f2f7f2b369a700b1824deb3f7
   languageName: node
   linkType: hard
 

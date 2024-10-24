@@ -4,6 +4,7 @@ import type {
   PayPalConfigResponse,
   PayPalCreateOrder,
   PayPalExecuteParams,
+  PayPalGetOrderDetailsParams,
 } from '@plentymarkets/shop-api';
 import { paypalGetters } from '@plentymarkets/shop-api';
 import { PayPalLoadScript, PayPalScript } from '~/composables';
@@ -239,8 +240,16 @@ export const usePayPal = () => {
     return data.value?.data ?? null;
   };
 
+  const getOrder = async (params: PayPalGetOrderDetailsParams) => {
+    const { data, error } = await useAsyncData(() => useSdk().plentysystems.getPayPalOrderDetails(params));
+    useHandleError(error.value);
+
+    return data.value?.data ?? null;
+  }
+
   return {
     state,
+    getOrder,
     approveOrder,
     createTransaction,
     executeOrder,

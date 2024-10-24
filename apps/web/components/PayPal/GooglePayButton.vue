@@ -3,10 +3,11 @@
 </template>
 
 <script lang="ts" setup>
-import { GooglePayPayerActionData, PayPalAddToCartCallback } from '~/components/PayPal/types';
+import { PayPalAddToCartCallback } from '~/components/PayPal/types';
 import { cartGetters, orderGetters } from '@plentymarkets/shop-api';
+
 let countryCodeString = '';
-const { getScript, executeOrder, createCreditCardTransaction, captureOrder } = usePayPal();
+const { getScript, executeOrder, createCreditCardTransaction, captureOrder, getOrder } = usePayPal();
 const { shippingPrivacyAgreement } = useAdditionalInformation();
 const { createOrder } = useMakeOrder();
 const { data: cart, clearCartItems } = useCart();
@@ -67,41 +68,7 @@ async function getGooglePaymentDataRequest() {
   paymentDataRequest.merchantInfo = merchantInfo;
   return paymentDataRequest;
 }
-/*
-function onPaymentAuthorized(
-  paymentData: google.payments.api.PaymentData,
-): Promise<google.payments.api.PaymentAuthorizationResult> {
-  return new Promise<google.payments.api.PaymentAuthorizationResult>((resolve) => {
-    processPayment(paymentData)
-      // eslint-disable-next-line promise/always-return
-      .then(() => {
-        resolve({
-          transactionState: 'SUCCESS',
-        } as google.payments.api.PaymentAuthorizationResult);
-      })
-      .catch((error) => {
-        resolve({
-          transactionState: 'ERROR',
-          error: {
-            message: error.message,
-          },
-        } as google.payments.api.PaymentAuthorizationResult);
-      });
-  });
-}
 
-function getGooglePaymentsClient() {
-  if (paymentsClient === null) {
-    paymentsClient = new google.payments.api.PaymentsClient({
-      environment: 'TEST',
-      paymentDataCallbacks: {
-        onPaymentAuthorized: onPaymentAuthorized,
-      },
-    });
-  }
-  return paymentsClient;
-}
-*/
 function getGooglePaymentsClient() {
   if (paymentsClient === null) {
     paymentsClient = new google.payments.api.PaymentsClient({
@@ -140,24 +107,16 @@ function getGoogleTransactionInfo() {
     totalPrice: cartGetters.getTotals(cart.value).total.toString(),
   };
 }
-// async function onGooglePaymentButtonClicked() {
-//   emits('button-clicked', async (successfully) => {
-//     if (successfully) {
-//       const paymentDataRequest = await getGooglePaymentDataRequest();
-//       const paymentsClient = getGooglePaymentsClient();
-//       paymentsClient.loadPaymentData(paymentDataRequest);
-//     }
-//   });
-// }
+
 async function onGooglePaymentButtonClicked() {
-  emits('button-clicked', async (successfully) => {
+  await emits('button-clicked', async (successfully) => {
     if (successfully) {
       const paymentDataRequest = await getGooglePaymentDataRequest();
       const paymentsClient = getGooglePaymentsClient();
       paymentsClient
         .loadPaymentData(paymentDataRequest)
         // eslint-disable-next-line promise/always-return
-        .then((paymentData: any) => {
+        .then((paymentData: google.payments.api.PaymentData) => {
           processPayment(paymentData);
         })
         .catch((error) => {
@@ -173,7 +132,7 @@ async function processPayment(paymentData: google.payments.api.PaymentData) {
     console.log('transaction', transaction);
     if (!transaction || !transaction.id) throw new Error('Transaction creation failed.');
 
-    const { status } = await (paypal as any).Googlepay().confirmOrder({
+    let { status } = await (paypal as any).Googlepay().confirmOrder({
       orderId: transaction.id,
       paymentMethodData: paymentData.paymentMethodData,
     });
@@ -183,27 +142,38 @@ async function processPayment(paymentData: google.payments.api.PaymentData) {
       await (paypal as any)
         .Googlepay()
         .initiatePayerAction({ orderId: transaction.id })
-      console.log('TODO: \'/rest/payment/payPal/order_details/\' + merchantId + \'/\' + id');
+
+      const paypalOrder = await getOrder({
+        paypalOrderId: transaction.id,
+        payPalPayerId: transaction.payPalPayerId,
+      });
+      console.log('paypalOrder', paypalOrder);
+      status = paypalOrder?.status || 'ERROR';
     }
 
-    await captureOrder({
-      paypalOrderId: transaction.id,
-      paypalPayerId: transaction.payPalPayerId,
-    });
-    const order = await createOrder({
-      paymentId: cart.value.methodOfPaymentId,
-      shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
-    });
-    if (!order || !order.order || !order.order.id) throw new Error('Order creation failed.');
-    await executeOrder({
-      mode: 'googlepay',
-      plentyOrderId: Number.parseInt(orderGetters.getId(order)),
-      paypalTransactionId: transaction.id,
-    });
-    clearCartItems();
-    navigateTo(localePath(paths.confirmation + '/' + order.order.id + '/' + order.order.accessKey));
+    console.log('check status', status);
+    if (status === "APPROVED") {
+      await captureOrder({
+        paypalOrderId: transaction.id,
+        paypalPayerId: transaction.payPalPayerId,
+      });
+      const order = await createOrder({
+        paymentId: cart.value.methodOfPaymentId,
+        shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
+      });
+      if (!order || !order.order || !order.order.id) throw new Error('Order creation failed.');
+      await executeOrder({
+        mode: 'googlepay',
+        plentyOrderId: Number.parseInt(orderGetters.getId(order)),
+        paypalTransactionId: transaction.id,
+      });
+      clearCartItems();
+      navigateTo(localePath(paths.confirmation + '/' + order.order.id + '/' + order.order.accessKey));
 
-    return { transactionState: 'SUCCESS' };
+      return {transactionState: 'SUCCESS'};
+    } else {
+      return {transactionState: 'ERROR'};
+    }
   } catch (error: unknown) {
     console.error('Error during payment process:', error);
     return {
