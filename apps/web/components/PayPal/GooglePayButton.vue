@@ -146,9 +146,9 @@ async function processPayment(paymentData: google.payments.api.PaymentData) {
       const paypalOrder = await getOrder({
         paypalOrderId: transaction.id,
         payPalPayerId: transaction.payPalPayerId,
-      });
+      }) as any;
       console.log('paypalOrder', paypalOrder);
-      status = paypalOrder?.status || 'ERROR';
+      status = paypalOrder?.result?.status || 'ERROR';
     }
 
     console.log('check status', status);
