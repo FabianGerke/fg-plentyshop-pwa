@@ -76,7 +76,9 @@ async function checkGooglePayEligibility(paypalScript: PayPalNamespace): Promise
       .isReadyToPay(request)
       .then(async function (response) {
         if (response.result) {
-          await useSdk().plentysystems.doHandleAllowPaymentGooglePay(config.allowedPaymentMethods)
+          await useSdk().plentysystems.doHandleAllowPaymentGooglePay({
+            allowedPaymentMethods: config.allowedPaymentMethods
+          })
         }
       })
       .catch(function (err) {
