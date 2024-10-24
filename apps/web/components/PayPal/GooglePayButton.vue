@@ -6,7 +6,7 @@
 import { GooglePayPayerActionData, PayPalAddToCartCallback } from '~/components/PayPal/types';
 import { cartGetters, orderGetters } from '@plentymarkets/shop-api';
 let countryCodeString = '';
-const { getScript, executeOrder, createTransaction, captureOrder } = usePayPal();
+const { getScript, executeOrder, createCreditCardTransaction, captureOrder } = usePayPal();
 const { shippingPrivacyAgreement } = useAdditionalInformation();
 const { createOrder } = useMakeOrder();
 const { data: cart, clearCartItems } = useCart();
@@ -168,7 +168,7 @@ async function onGooglePaymentButtonClicked() {
 }
 async function processPayment(paymentData: google.payments.api.PaymentData) {
   try {
-    const transaction = await createTransaction('google_pay');
+    const transaction = await createCreditCardTransaction();
     if (!transaction || !transaction.id) throw new Error('Transaction creation failed.');
     const { status } = await (paypal as any).Googlepay().confirmOrder({
       orderId: transaction.id,
