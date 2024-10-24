@@ -169,48 +169,38 @@ async function onGooglePaymentButtonClicked() {
 async function processPayment(paymentData: google.payments.api.PaymentData) {
   try {
     const transaction = await createCreditCardTransaction();
+    console.log('transaction', transaction);
     if (!transaction || !transaction.id) throw new Error('Transaction creation failed.');
     const { status } = await (paypal as any).Googlepay().confirmOrder({
       orderId: transaction.id,
       paymentMethodData: paymentData.paymentMethodData,
     });
+    console.log(status);
     if (status === 'PAYER_ACTION_REQUIRED') {
       // eslint-disable-next-line promise/catch-or-return
-      (paypal as any)
+      await (paypal as any)
         .Googlepay()
         .initiatePayerAction({ orderId: transaction.id })
-        // eslint-disable-next-line promise/always-return
-        .then(async (data: GooglePayPayerActionData) => {
-          await captureOrder({
-            paypalOrderId: data.paypalOrderId,
-            paypalPayerId: data.paypalPayerId,
-          });
-          const order = await createOrder({
-            paymentId: cart.value.methodOfPaymentId,
-            shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
-          });
-          await executeOrder({
-            mode: 'googlepay',
-            plentyOrderId: Number.parseInt(orderGetters.getId(order)),
-            paypalTransactionId: data.orderID,
-          });
-          clearCartItems();
-          navigateTo(localePath(paths.confirmation + '/' + order.order.id + '/' + order.order.accessKey));
-        });
-    } else {
-      const order = await createOrder({
-        paymentId: cart.value.methodOfPaymentId,
-        shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
-      });
-      if (!order || !order.order || !order.order.id) throw new Error('Order creation failed.');
-      await executeOrder({
-        mode: 'googlepay',
-        plentyOrderId: Number.parseInt(orderGetters.getId(order)),
-        paypalTransactionId: transaction.id,
-      });
-      clearCartItems();
-      navigateTo(localePath(paths.confirmation + '/' + order.order.id + '/' + order.order.accessKey));
+      console.log('TODO: \'/rest/payment/payPal/order_details/\' + merchantId + \'/\' + id');
     }
+
+    await captureOrder({
+      paypalOrderId: transaction.id,
+      paypalPayerId: transaction.payPalPayerId,
+    });
+    const order = await createOrder({
+      paymentId: cart.value.methodOfPaymentId,
+      shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
+    });
+    if (!order || !order.order || !order.order.id) throw new Error('Order creation failed.');
+    await executeOrder({
+      mode: 'googlepay',
+      plentyOrderId: Number.parseInt(orderGetters.getId(order)),
+      paypalTransactionId: transaction.id,
+    });
+    clearCartItems();
+    navigateTo(localePath(paths.confirmation + '/' + order.order.id + '/' + order.order.accessKey));
+
     return { transactionState: 'SUCCESS' };
   } catch (error: unknown) {
     return {
