@@ -163,7 +163,7 @@ async function processPayment(paymentData: google.payments.api.PaymentData) {
       });
       if (!order || !order.order || !order.order.id) throw new Error('Order creation failed.');
       await executeOrder({
-        mode: 'google_pay',
+        mode: 'paypal',
         plentyOrderId: Number.parseInt(orderGetters.getId(order)),
         paypalTransactionId: transaction.id,
       });
