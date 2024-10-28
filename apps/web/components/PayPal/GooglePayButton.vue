@@ -46,8 +46,6 @@ const addGooglePayButton = () => {
 
 const onGooglePayLoaded = async () => {
   try {
-    console.log('config', googleConfig.value);
-    console.log(paymentsClient.value);
     console.log('request', getIsReadyToPayRequest());
     const response = await paymentsClient.value.isReadyToPay(getIsReadyToPayRequest());
     console.log('onGooglePayLoaded', response)
