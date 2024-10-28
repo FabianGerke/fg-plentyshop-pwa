@@ -1,11 +1,6 @@
 import { GooglePayPayPal, GooglePayConfig } from '~/composables/useGooglePay/types';
 import { cartGetters, orderGetters } from '@plentymarkets/shop-api';
 
-const baseRequest = {
-  apiVersion: 2,
-  apiVersionMinor: 0,
-};
-
 const loadExternalScript = async () => {
   return new Promise((resolve, reject) => {
     const scriptElement = document.createElement('script');
@@ -74,11 +69,15 @@ export const useGooglePay = () => {
   };
 
   const getGooglePaymentDataRequest = async () => {
-    const paymentDataRequest = Object.assign({}, baseRequest) as google.payments.api.PaymentDataRequest;
     const { allowedPaymentMethods, merchantInfo } = state.value.googleConfig;
-    paymentDataRequest.allowedPaymentMethods = allowedPaymentMethods;
-    paymentDataRequest.transactionInfo = getGoogleTransactionInfo();
-    paymentDataRequest.merchantInfo = merchantInfo;
+    const paymentDataRequest = {
+      apiVersion: 2,
+      apiVersionMinor: 0,
+      allowedPaymentMethods,
+      transactionInfo: getGoogleTransactionInfo(),
+      merchantInfo,
+    } as google.payments.api.PaymentDataRequest;
+
     return structuredClone(paymentDataRequest);
   };
 
@@ -147,10 +146,11 @@ export const useGooglePay = () => {
   };
 
   const getIsReadyToPayRequest = (): google.payments.api.IsReadyToPayRequest => {
-    const paymentDataRequest = Object.assign({}) as google.payments.api.IsReadyToPayRequest;
-    paymentDataRequest.apiVersion = 2;
-    paymentDataRequest.apiVersionMinor = 0;
-    paymentDataRequest.allowedPaymentMethods = state.value.googleConfig.allowedPaymentMethods;
+    const paymentDataRequest = {
+      apiVersion: 2,
+      apiVersionMinor: 0,
+      allowedPaymentMethods: state.value.googleConfig.allowedPaymentMethods,
+    } as google.payments.api.IsReadyToPayRequest;
     return structuredClone(paymentDataRequest);
   }
 
