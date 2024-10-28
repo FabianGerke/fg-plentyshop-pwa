@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "dockerfileLines": [
     "FROM node:20",
-    "FROM yarn:3.6.1",
+    "RUN npm install -g yarn@3.6.1",
     "WORKDIR /usr/src/app",
     "ARG API_ENDPOINT",
     "ARG API_SECURITY_TOKEN",
