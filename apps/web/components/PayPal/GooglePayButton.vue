@@ -5,7 +5,7 @@
 <script lang="ts" setup>
 import { PayPalAddToCartCallback } from '~/components/PayPal/types';
 
-const { initialize, paymentsClient, googleConfig, getGooglePaymentDataRequest, processPayment } = useGooglePay();
+const { initialize, paymentsClient, googleConfig, getGooglePaymentDataRequest, processPayment, getIsReadyToPayRequest } = useGooglePay();
 const emits = defineEmits<{
   (event: 'button-clicked', callback: PayPalAddToCartCallback): Promise<void>;
 }>();
@@ -49,11 +49,7 @@ const onGooglePayLoaded = async () => {
     const { allowedPaymentMethods, apiVersion, apiVersionMinor } = googleConfig.value;
     console.log('config', googleConfig.value);
     console.log(paymentsClient.value);
-    const response = await paymentsClient.value.isReadyToPay({
-      allowedPaymentMethods,
-      apiVersion,
-      apiVersionMinor,
-    });
+    const response = await paymentsClient.value.isReadyToPay(getIsReadyToPayRequest());
     console.log('onGooglePayLoaded', response)
     if (response.result) {
       addGooglePayButton();

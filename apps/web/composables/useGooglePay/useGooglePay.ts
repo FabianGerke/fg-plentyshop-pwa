@@ -146,10 +146,17 @@ export const useGooglePay = () => {
     }
   };
 
+  const getIsReadyToPayRequest = (): google.payments.api.IsReadyToPayRequest => {
+    return Object.assign({}, baseRequest, {
+      allowedPaymentMethods: state.value.googleConfig.allowedPaymentMethods,
+    });
+  }
+
   return {
     ...toRefs(state.value),
     initialize,
     getGooglePaymentDataRequest,
     processPayment,
+    getIsReadyToPayRequest,
   };
 };
