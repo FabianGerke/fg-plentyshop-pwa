@@ -12,6 +12,13 @@ import { PayPalLoadScript, PayPalScript } from '~/composables';
 const localeMap: Record<string, string> = { de: 'de_DE' };
 const getLocaleForPayPal = (locale: string): string => localeMap[locale] || 'en_US';
 
+const getOrder = async (params: PayPalGetOrderDetailsParams) => {
+  const { data, error } = await useAsyncData(() => useSdk().plentysystems.getPayPalOrderDetails(params));
+  useHandleError(error.value);
+
+  return data.value?.data ?? null;
+};
+
 /**
  * @description Composable for managing PayPal interaction.
  * @example
@@ -239,13 +246,6 @@ export const usePayPal = () => {
     state.value.loading = false;
     return data.value?.data ?? null;
   };
-
-  const getOrder = async (params: PayPalGetOrderDetailsParams) => {
-    const { data, error } = await useAsyncData(() => useSdk().plentysystems.getPayPalOrderDetails(params));
-    useHandleError(error.value);
-
-    return data.value?.data ?? null;
-  }
 
   return {
     state,

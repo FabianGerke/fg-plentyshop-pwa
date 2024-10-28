@@ -1,7 +1,7 @@
 import { PaymentEligibility, UseMobileMethodsReturn, UseMobilePaymentMethods } from './types';
-import {cartGetters} from "@plentymarkets/shop-api";
-import {PayPalNamespace} from "@paypal/paypal-js";
-import {usePaymentMethods} from "~/composables";
+import { cartGetters } from '@plentymarkets/shop-api';
+import { PayPalNamespace } from '@paypal/paypal-js';
+import { usePaymentMethods } from '~/composables';
 
 const checkMobilePayments = async (): Promise<PaymentEligibility> => {
   const { getScript } = usePayPal();
@@ -65,27 +65,33 @@ async function checkGooglePayEligibility(paypalScript: PayPalNamespace): Promise
     });
     const googlePay = (paypalScript as any).Googlepay();
     const config = await googlePay.config();
-    const request = Object.assign({}, {
-      apiVersion: 2,
-      apiVersionMinor: 0,
-    }, {
-      allowedPaymentMethods: config.allowedPaymentMethods,
-    });
+    const request = Object.assign(
+      {},
+      {
+        apiVersion: 2,
+        apiVersionMinor: 0,
+      },
+      {
+        allowedPaymentMethods: config.allowedPaymentMethods,
+      },
+    );
 
     await googlePayClient
       .isReadyToPay(request)
       .then(async function (response) {
         if (response.result) {
           await useSdk().plentysystems.doHandleAllowPaymentGooglePay({
-            allowedPaymentMethods: config.allowedPaymentMethods
-          })
+            allowedPaymentMethods: config.allowedPaymentMethods,
+          });
+          return true;
         }
+        return false;
       })
-      .catch(function (err) {
-        console.error(err);
+      .catch(function (error: unknown) {
+        console.error(error);
       });
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error(error);
   }
 
   return false;
