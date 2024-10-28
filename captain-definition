@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 2,
+  "dockerfileLines": [
+    "FROM node:20",
+    "RUN yarn set version 3.6.4",
+    "WORKDIR /usr/src/app",
+    "ARG API_ENDPOINT",
+    "ARG API_SECURITY_TOKEN",
+    "ARG CLOUDFLARE_TURNSTILE_SITE_KEY",
+    "ENV API_ENDPOINT=$API_ENDPOINT",
+    "ENV API_SECURITY_TOKEN=$API_SECURITY_TOKEN",
+    "ENV CLOUDFLARE_TURNSTILE_SITE_KEY=$CLOUDFLARE_TURNSTILE_SITE_KEY",
+    "COPY . .",
+    "RUN yarn install",
+    "RUN yarn build",
+    "EXPOSE 3000",
+    "CMD [\"yarn\", \"start\"]"
+  ],
+  "captainVersion": "1"
+}
