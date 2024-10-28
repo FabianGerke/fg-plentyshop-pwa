@@ -52,6 +52,7 @@ const onGooglePayLoaded = async () => {
       apiVersion,
       apiVersionMinor,
     });
+    console.log('onGooglePayLoaded', response)
     if (response.result) {
       addGooglePayButton();
     }
@@ -62,6 +63,7 @@ const onGooglePayLoaded = async () => {
 
 const createButton = async () => {
   if (await initialize()) {
+    console.log('initialize', paymentsClient.value)
     onGooglePayLoaded().then().catch();
   }
 };

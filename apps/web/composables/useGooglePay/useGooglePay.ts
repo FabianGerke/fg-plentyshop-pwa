@@ -44,15 +44,18 @@ export const useGooglePay = () => {
     const { getScript } = usePayPal();
     const script = await getScript(currency.value);
 
-    if (!script) return false;
+    console.log('Initializing Google Pay')
 
-    state.value.script = (script as any).Googlepay() as GooglePayPayPal;
+    if (!script) return false;
+    console.log('Script loaded')
 
     if (!state.value.scriptLoaded) {
       await loadExternalScript();
       state.value.scriptLoaded = true;
     }
 
+    state.value.script = (script as any).Googlepay() as GooglePayPayPal;
+    console.log('Google script loaded')
     state.value.googleConfig = await state.value.script.config();
     state.value.paymentsClient = getPaymentsClient();
 
