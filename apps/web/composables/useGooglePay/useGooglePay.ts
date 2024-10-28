@@ -79,7 +79,7 @@ export const useGooglePay = () => {
     paymentDataRequest.allowedPaymentMethods = allowedPaymentMethods;
     paymentDataRequest.transactionInfo = getGoogleTransactionInfo();
     paymentDataRequest.merchantInfo = merchantInfo;
-    return paymentDataRequest;
+    return structuredClone(paymentDataRequest);
   };
 
   const processPayment = async (paymentData: google.payments.api.PaymentData) => {
