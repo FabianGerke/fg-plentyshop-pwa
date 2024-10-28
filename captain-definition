@@ -24,8 +24,7 @@
     "RUN echo \"    spec: '@yarnpkg/plugin-interactive-tools'\" >> .yarnrc.yml",
     "RUN echo \"\" >> .yarnrc.yml",
     "RUN echo \"yarnPath: .yarn/releases/yarn-3.6.4.cjs\" >> .yarnrc.yml",
-    "RUN yarn config -v",
-    "RUN yarn install",
+    "RUN yarn",
     "RUN yarn build",
     "EXPOSE 3000",
     "CMD [\"yarn\", \"start\"]"
