@@ -25,6 +25,7 @@
     "RUN echo \"\" >> .yarnrc.yml",
     "RUN echo \"yarnPath: .yarn/releases/yarn-3.6.4.cjs\" >> .yarnrc.yml",
     "RUN corepack enable && corepack prepare yarn@stable --activate",
+    "RUN yarn config -v",
     "RUN yarn install",
     "RUN yarn build",
     "EXPOSE 3000",
