@@ -2,6 +2,7 @@
   "schemaVersion": 2,
   "dockerfileLines": [
     "FROM node:20",
+    "RUN npm install -g npm@10.9.0",
     "RUN npm install -g yarn@3.6.1",
     "WORKDIR /usr/src/app",
     "ARG API_ENDPOINT",
