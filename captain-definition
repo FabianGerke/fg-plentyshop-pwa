@@ -18,6 +18,7 @@
     "RUN echo \"  plentymarkets:\" >> .yarnrc.yml",
     "RUN echo \"    npmRegistryServer: 'https://npm.pkg.github.com'\" >> .yarnrc.yml",
     "RUN echo \"    npmAuthToken: '$YARN_KEY'\" >> .yarnrc.yml",
+    "RUN corepack enable && corepack prepare yarn@stable --activate",
     "RUN yarn install",
     "RUN yarn build",
     "EXPOSE 3000",
