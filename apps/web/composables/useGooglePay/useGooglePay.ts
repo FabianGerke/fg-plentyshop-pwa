@@ -147,16 +147,11 @@ export const useGooglePay = () => {
   };
 
   const getIsReadyToPayRequest = (): google.payments.api.IsReadyToPayRequest => {
-    console.log('Getting is ready to pay request')
     const paymentDataRequest = Object.assign({}) as google.payments.api.IsReadyToPayRequest;
-    console.log('Payment data request', paymentDataRequest)
     paymentDataRequest.apiVersion = 2;
-    console.log('Payment data request', paymentDataRequest)
     paymentDataRequest.apiVersionMinor = 0;
-    console.log('Payment data request', paymentDataRequest)
     paymentDataRequest.allowedPaymentMethods = state.value.googleConfig.allowedPaymentMethods;
-    console.log('Payment data request return', paymentDataRequest)
-    return paymentDataRequest;
+    return structuredClone(paymentDataRequest);
   }
 
   return {
