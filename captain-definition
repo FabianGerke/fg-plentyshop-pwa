@@ -1,7 +1,8 @@
 {
   "schemaVersion": 2,
   "dockerfileLines": [
-    "FROM node:18",
+    "FROM node:20",
+    "FROM yarn:3.6.1",
     "WORKDIR /usr/src/app",
     "ARG API_ENDPOINT",
     "ARG API_SECURITY_TOKEN",
