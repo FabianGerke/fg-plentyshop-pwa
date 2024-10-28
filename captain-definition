@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "dockerfileLines": [
     "FROM node:20",
-    "RUN corepack enable && corepack prepare yarn@stable --activate",
+    "RUN yarn set version 3.6.4",
     "WORKDIR /usr/src/app",
     "ARG API_ENDPOINT",
     "ARG API_SECURITY_TOKEN",
