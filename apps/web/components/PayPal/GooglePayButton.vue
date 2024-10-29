@@ -38,7 +38,7 @@ async function onGooglePaymentButtonClicked() {
 
 const addGooglePayButton = () => {
   try {
-    console.log('addGooglePayButton', paymentsClient.value);
+    console.log('addGooglePayButton2', paymentsClient.value);
     console.log('onGooglePaymentButtonClicked', onGooglePaymentButtonClicked)
     const button = paymentsClient.value.createButton({
       onClick: onGooglePaymentButtonClicked,
