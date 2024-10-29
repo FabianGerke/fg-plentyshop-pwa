@@ -11,7 +11,7 @@ const emits = defineEmits<{
 }>();
 
 async function onGooglePaymentButtonClicked() {
-  console.log('onGooglePaymentButtonClicked')
+  console.log('onGooglePaymentButtonClicked2')
   await emits('button-clicked', async (successfully) => {
     if (successfully) {
       const paymentDataRequest = getGooglePaymentDataRequest();
