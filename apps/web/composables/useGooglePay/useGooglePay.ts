@@ -92,30 +92,41 @@ export const useGooglePay = () => {
       return;
     }
 
+    console.log('Created transaction')
+
+    console.log('Confirm order', transaction.id, paymentData.paymentMethodData);
     let { status } = await state.value.script.confirmOrder({
       orderId: transaction.id,
       paymentMethodData: paymentData.paymentMethodData,
     });
+    console.log('Order confirmed', status)
 
     if (status === 'PAYER_ACTION_REQUIRED') {
+      console.log('initiatePayerAction')
       await state.value.script.initiatePayerAction();
+      console.log('initiatePayerAction finished')
       const paypalOrder = (await getOrder({
         paypalOrderId: transaction.id,
         payPalPayerId: transaction.payPalPayerId,
       })) as any;
+      console.log('paypalOrder', paypalOrder);
       status = paypalOrder?.result?.status || 'ERROR';
     }
 
+    console.log('Order status', status)
+
     if (status === 'APPROVED') {
+      console.log('Capture order')
       await captureOrder({
         paypalOrderId: transaction.id,
         paypalPayerId: transaction.payPalPayerId,
       });
+      console.log('createOrder')
       const order = await createOrder({
         paymentId: cart.value.methodOfPaymentId,
         shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
       });
-
+      console.log('order', order)
       if (!order || !order.order || !order.order.id) {
         showErrorNotification('Failed to create plenty order');
         return;
