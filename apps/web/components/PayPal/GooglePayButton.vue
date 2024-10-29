@@ -32,7 +32,7 @@ async function onGooglePaymentButtonClicked() {
         });
     }
   });
-};
+}
 
 const addGooglePayButton = () => {
   try {
