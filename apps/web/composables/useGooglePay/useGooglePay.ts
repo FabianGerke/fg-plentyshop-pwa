@@ -1,5 +1,5 @@
-import {GooglePayConfig, GooglePayPayPal} from '~/composables/useGooglePay/types';
-import {cartGetters, orderGetters} from '@plentymarkets/shop-api';
+import { GooglePayConfig, GooglePayPayPal } from '~/composables/useGooglePay/types';
+import { cartGetters, orderGetters } from '@plentymarkets/shop-api';
 
 const loadExternalScript = async () => {
   return new Promise((resolve, reject) => {
@@ -145,7 +145,7 @@ export const useGooglePay = () => {
       apiVersionMinor: 0,
       allowedPaymentMethods: JSON.parse(JSON.stringify(state.value.googleConfig.allowedPaymentMethods)),
     } as google.payments.api.IsReadyToPayRequest;
-  }
+  };
 
   return {
     ...toRefs(state.value),
