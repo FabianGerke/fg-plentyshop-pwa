@@ -11,9 +11,11 @@ const emits = defineEmits<{
 }>();
 
 const onGooglePaymentButtonClicked = async () => {
+  console.log('onGooglePaymentButtonClicked')
   await emits('button-clicked', async (successfully) => {
     if (successfully) {
       const paymentDataRequest = await getGooglePaymentDataRequest();
+      console.log('paymentDataRequest', paymentDataRequest)
       paymentsClient.value
         .loadPaymentData(paymentDataRequest)
         // eslint-disable-next-line promise/always-return
@@ -33,14 +35,20 @@ const onGooglePaymentButtonClicked = async () => {
 };
 
 const addGooglePayButton = () => {
-  if (paymentsClient.value) {
+  try {
+    console.log('addGooglePayButton');
     const button = paymentsClient.value.createButton({
       onClick: onGooglePaymentButtonClicked,
     });
+    console.log('button init');
     const theContainer = document.querySelector('#google-pay-button');
+    console.log('container', theContainer);
     if (theContainer) {
       theContainer.append(button);
+      console.log('button appended')
     }
+  } catch (error) {
+    console.error(error);
   }
 };
 
