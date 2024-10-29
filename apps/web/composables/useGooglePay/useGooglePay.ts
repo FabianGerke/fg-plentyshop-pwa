@@ -69,13 +69,12 @@ export const useGooglePay = () => {
   };
 
   const getGooglePaymentDataRequest = () => {
-    const { allowedPaymentMethods, merchantInfo } = state.value.googleConfig;
     return JSON.parse(JSON.stringify({
       apiVersion: 2,
       apiVersionMinor: 0,
-      allowedPaymentMethods,
+      allowedPaymentMethods: state.value.googleConfig.allowedPaymentMethods,
       transactionInfo: getGoogleTransactionInfo(),
-      merchantInfo,
+      merchantInfo: state.value.googleConfig.merchantInfo,
     })) as google.payments.api.PaymentDataRequest;
   };
 
