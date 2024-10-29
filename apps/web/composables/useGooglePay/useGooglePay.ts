@@ -42,7 +42,7 @@ export const useGooglePay = () => {
     console.log('Initializing Google Pay')
 
     if (!script) return false;
-    console.log('Script loaded')
+    console.log('Script loaded 2')
 
     if (!state.value.scriptLoaded) {
       await loadExternalScript();
@@ -60,22 +60,22 @@ export const useGooglePay = () => {
   const getGoogleTransactionInfo = () => {
     const { data: cart } = useCart();
     const currency = computed(() => cartGetters.getCurrency(cart.value) || (useAppConfig().fallbackCurrency as string));
-    return JSON.parse(JSON.stringify({
+    return {
       countryCode: state.value.googleConfig.countryCode,
       currencyCode: currency.value,
       totalPriceStatus: 'FINAL',
       totalPrice: cartGetters.getTotals(cart.value).total.toString(),
-    })) as google.payments.api.TransactionInfo;
+    } as google.payments.api.TransactionInfo;
   };
 
   const getGooglePaymentDataRequest = () => {
-    return JSON.parse(JSON.stringify({
+    return {
       apiVersion: 2,
       apiVersionMinor: 0,
-      allowedPaymentMethods: state.value.googleConfig.allowedPaymentMethods,
+      allowedPaymentMethods: JSON.parse(JSON.stringify(state.value.googleConfig.allowedPaymentMethods)),
       transactionInfo: getGoogleTransactionInfo(),
-      merchantInfo: state.value.googleConfig.merchantInfo,
-    })) as google.payments.api.PaymentDataRequest;
+      merchantInfo: JSON.parse(JSON.stringify(state.value.googleConfig.merchantInfo)),
+    } as google.payments.api.PaymentDataRequest;
   };
 
   const processPayment = async (paymentData: google.payments.api.PaymentData) => {
