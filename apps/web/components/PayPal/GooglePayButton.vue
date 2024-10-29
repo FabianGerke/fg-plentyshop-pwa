@@ -14,24 +14,24 @@ async function onGooglePaymentButtonClicked() {
   console.log('onGooglePaymentButtonClicked2')
   await emits('button-clicked', async (successfully) => {
     if (successfully) {
-      const paymentDataRequest = getGooglePaymentDataRequest();
-      console.log('paymentDataRequest', paymentDataRequest)
       /*
-      paymentsClient.value
-        .loadPaymentData(paymentDataRequest)
-        // eslint-disable-next-line promise/always-return
-        .then((paymentData: google.payments.api.PaymentData) => {
-          processPayment(paymentData).catch((error) => {
-            useNotification().send({
-              message: error.message || error || 'An error occurred while processing the payment. Please try again.',
-              type: 'negative',
-            });
-          });
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-       */
+     const paymentDataRequest = getGooglePaymentDataRequest();
+     console.log('paymentDataRequest', paymentDataRequest)
+     paymentsClient.value
+       .loadPaymentData(paymentDataRequest)
+       // eslint-disable-next-line promise/always-return
+       .then((paymentData: google.payments.api.PaymentData) => {
+         processPayment(paymentData).catch((error) => {
+           useNotification().send({
+             message: error.message || error || 'An error occurred while processing the payment. Please try again.',
+             type: 'negative',
+           });
+         });
+       })
+       .catch((error) => {
+         console.error(error);
+       });
+      */
     }
   });
 }
