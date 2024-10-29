@@ -16,6 +16,7 @@ async function onGooglePaymentButtonClicked() {
     if (successfully) {
       const paymentDataRequest = getGooglePaymentDataRequest();
       console.log('paymentDataRequest', paymentDataRequest)
+      /*
       paymentsClient.value
         .loadPaymentData(paymentDataRequest)
         // eslint-disable-next-line promise/always-return
@@ -30,6 +31,7 @@ async function onGooglePaymentButtonClicked() {
         .catch((error) => {
           console.error(error);
         });
+       */
     }
   });
 }
