@@ -32,18 +32,23 @@ async function onGooglePaymentButtonClicked() {
       const paymentDataRequest = getGooglePaymentDataRequest();
       toRaw(paymentsClient.value)
         .loadPaymentData(paymentDataRequest)
-        // eslint-disable-next-line promise/always-return
         .then((paymentData: google.payments.api.PaymentData) => {
-          processPayment(paymentData).catch((error) => {
+          // eslint-disable-next-line promise/no-nesting
+          processPayment(paymentData).catch((error: Error) => {
             useNotification().send({
-              message: error.message || error || 'An error occurred while processing the payment. Please try again.',
+              message: error.message || 'An error occurred while processing the payment. Please try again.',
               type: 'negative',
             });
             paymentLoading.value = false;
           });
+          return true;
         })
-        .catch((error) => {
-          console.error(error);
+        .catch((error: Error) => {
+          useNotification().send({
+            message: error.message || 'An error occurred while processing the payment. Please try again.',
+            type: 'negative',
+          });
+          paymentLoading.value = false;
         });
     }
   });
@@ -76,7 +81,7 @@ const onGooglePayLoaded = async () => {
 
 const createButton = async () => {
   if (await initialize()) {
-    onGooglePayLoaded().then().catch();
+    await onGooglePayLoaded();
   }
 };
 

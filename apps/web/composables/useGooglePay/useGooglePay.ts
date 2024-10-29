@@ -1,5 +1,5 @@
 import { GooglePayConfig, GooglePayPayPal } from '~/composables/useGooglePay/types';
-import { cartGetters, orderGetters } from '@plentymarkets/shop-api';
+import { cartGetters, orderGetters, PayPalGooglePayAllowedPaymentMethod } from '@plentymarkets/shop-api';
 
 const loadExternalScript = async () => {
   return new Promise((resolve, reject) => {
@@ -147,11 +147,29 @@ export const useGooglePay = () => {
     } as google.payments.api.IsReadyToPayRequest;
   };
 
+  const checkIsEligible = async () => {
+    console.log('Checking eligibility')
+    if (await initialize()) {
+      const request = getIsReadyToPayRequest();
+      const response = await toRaw(state.value.paymentsClient).isReadyToPay(request);
+
+      if (response.result) {
+        await useSdk().plentysystems.doHandleAllowPaymentGooglePay({
+          allowedPaymentMethods: toRaw(
+            state.value.googleConfig.allowedPaymentMethods,
+          ) as PayPalGooglePayAllowedPaymentMethod[],
+        });
+        await usePaymentMethods().fetchPaymentMethods();
+      }
+    }
+  };
+
   return {
     ...toRefs(state.value),
     initialize,
     getGooglePaymentDataRequest,
     processPayment,
     getIsReadyToPayRequest,
+    checkIsEligible,
   };
 };

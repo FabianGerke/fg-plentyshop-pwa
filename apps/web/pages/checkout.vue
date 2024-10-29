@@ -151,7 +151,9 @@ const {
 } = useCheckoutPagePaymentAndShipping();
 
 onNuxtReady(async () => {
-  await useMobileMethods().setMobilePayments();
+  if (process.client) {
+    await useGooglePay().checkIsEligible();
+  }
   useFetchAdddress(AddressType.Shipping)
     .fetchServer()
     .then(() => persistShippingAddress())
@@ -163,16 +165,14 @@ onNuxtReady(async () => {
     .catch((error) => useHandleError(error));
 });
 
-await getCart()
-  .then(async () => await useMobileMethods().setMobilePayments())
-  .then(
-    async () =>
-      await Promise.all([
-        useCartShippingMethods().getShippingMethods(),
-        usePaymentMethods().fetchPaymentMethods(),
-        useActiveShippingCountries().getActiveShippingCountries(),
-      ]),
-  );
+await getCart().then(
+  async () =>
+    await Promise.all([
+      useCartShippingMethods().getShippingMethods(),
+      usePaymentMethods().fetchPaymentMethods(),
+      useActiveShippingCountries().getActiveShippingCountries(),
+    ]),
+);
 
 const paypalCardDialog = ref(false);
 const disableShippingPayment = computed(() => loadShipping.value || loadPayment.value);
