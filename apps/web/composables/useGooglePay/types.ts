@@ -21,5 +21,5 @@ export interface GooglePayConfirmOrderResponse {
 export interface GooglePayPayPal {
   config(): Promise<GooglePayConfig>;
   confirmOrder(params: GooglePayConfirmOrderParams): Promise<GooglePayConfirmOrderResponse>;
-  initiatePayerAction(): Promise<void>;
+  initiatePayerAction(params: { orderId: string }): Promise<void>;
 }

@@ -103,7 +103,7 @@ export const useGooglePay = () => {
 
     if (status === 'PAYER_ACTION_REQUIRED') {
       console.log('initiatePayerAction')
-      await state.value.script.initiatePayerAction();
+      await state.value.script.initiatePayerAction({ orderId: transaction.id });
       console.log('initiatePayerAction finished')
       const paypalOrder = (await getOrder({
         paypalOrderId: transaction.id,
