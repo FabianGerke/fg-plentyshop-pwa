@@ -38,9 +38,9 @@ async function onGooglePaymentButtonClicked() {
 
 const addGooglePayButton = () => {
   try {
-    console.log('addGooglePayButton2', paymentsClient.value);
+    console.log('addGooglePayButton', toRaw(paymentsClient.value));
     console.log('onGooglePaymentButtonClicked', onGooglePaymentButtonClicked)
-    const button = paymentsClient.value.createButton({
+    const button = toRaw(paymentsClient.value).createButton({
       onClick: onGooglePaymentButtonClicked,
     });
     console.log('button init');
@@ -58,7 +58,7 @@ const addGooglePayButton = () => {
 const onGooglePayLoaded = async () => {
   try {
     console.log('getIsReadyToPayRequest', getIsReadyToPayRequest());
-    const response = await paymentsClient.value.isReadyToPay(getIsReadyToPayRequest());
+    const response = await toRaw(paymentsClient.value).isReadyToPay(getIsReadyToPayRequest());
     console.log('onGooglePayLoaded', response)
     if (response.result) {
       addGooglePayButton();
@@ -70,7 +70,7 @@ const onGooglePayLoaded = async () => {
 
 const createButton = async () => {
   if (await initialize()) {
-    console.log('initialize', paymentsClient.value)
+    console.log('initialize', toRaw(paymentsClient.value))
     onGooglePayLoaded().then().catch();
   }
 };
