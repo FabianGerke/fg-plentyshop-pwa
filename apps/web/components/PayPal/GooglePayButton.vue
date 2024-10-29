@@ -10,7 +10,7 @@ const emits = defineEmits<{
   (event: 'button-clicked', callback: PayPalAddToCartCallback): Promise<void>;
 }>();
 
-const onGooglePaymentButtonClicked = async () => {
+async function onGooglePaymentButtonClicked() {
   console.log('onGooglePaymentButtonClicked')
   await emits('button-clicked', async (successfully) => {
     if (successfully) {
