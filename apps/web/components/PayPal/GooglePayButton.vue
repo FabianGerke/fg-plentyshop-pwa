@@ -1,11 +1,17 @@
 <template>
   <div id="google-pay-button"></div>
+
+  <div v-if="paymentLoading" class="fixed top-0 left-0 bg-black bg-opacity-50 bottom-0 right-0 !z-50 flex items-center justify-center flex-col">
+    <div class="text-white mb-4">Payment in progress...</div>
+    <SfLoaderCircular class="flex justify-center items-center" size="lg" />
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { PayPalAddToCartCallback } from '~/components/PayPal/types';
+import {SfLoaderCircular} from "@storefront-ui/vue";
 
-const { initialize, paymentsClient, googleConfig, getGooglePaymentDataRequest, processPayment, getIsReadyToPayRequest } = useGooglePay();
+const { initialize, paymentsClient, paymentLoading, getGooglePaymentDataRequest, processPayment, getIsReadyToPayRequest } = useGooglePay();
 const emits = defineEmits<{
   (event: 'button-clicked', callback: PayPalAddToCartCallback): Promise<void>;
 }>();
@@ -14,7 +20,6 @@ async function onGooglePaymentButtonClicked() {
   await emits('button-clicked', async (successfully) => {
     if (successfully) {
      const paymentDataRequest = getGooglePaymentDataRequest();
-     console.log('paymentDataRequest', paymentDataRequest)
       toRaw(paymentsClient.value)
        .loadPaymentData(paymentDataRequest)
        // eslint-disable-next-line promise/always-return
@@ -24,6 +29,7 @@ async function onGooglePaymentButtonClicked() {
              message: error.message || error || 'An error occurred while processing the payment. Please try again.',
              type: 'negative',
            });
+           paymentLoading.value = false;
          });
        })
        .catch((error) => {
@@ -35,17 +41,12 @@ async function onGooglePaymentButtonClicked() {
 
 const addGooglePayButton = () => {
   try {
-    console.log('addGooglePayButton', toRaw(paymentsClient.value));
-    console.log('onGooglePaymentButtonClicked', onGooglePaymentButtonClicked)
     const button = toRaw(paymentsClient.value).createButton({
       onClick: onGooglePaymentButtonClicked,
     });
-    console.log('button init');
     const theContainer = document.querySelector('#google-pay-button');
-    console.log('container', theContainer);
     if (theContainer) {
       theContainer.append(button);
-      console.log('button appended')
     }
   } catch (error) {
     console.error(error);
@@ -54,9 +55,7 @@ const addGooglePayButton = () => {
 
 const onGooglePayLoaded = async () => {
   try {
-    console.log('getIsReadyToPayRequest', getIsReadyToPayRequest());
     const response = await toRaw(paymentsClient.value).isReadyToPay(getIsReadyToPayRequest());
-    console.log('onGooglePayLoaded', response)
     if (response.result) {
       addGooglePayButton();
     }
@@ -67,7 +66,6 @@ const onGooglePayLoaded = async () => {
 
 const createButton = async () => {
   if (await initialize()) {
-    console.log('initialize', toRaw(paymentsClient.value))
     onGooglePayLoaded().then().catch();
   }
 };

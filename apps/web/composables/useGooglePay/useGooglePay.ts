@@ -18,19 +18,13 @@ const getPaymentsClient = () => {
   });
 };
 
-const showErrorNotification = (message: string) => {
-  useNotification().send({
-    type: 'negative',
-    message,
-  });
-};
-
 export const useGooglePay = () => {
   const state = useState(`useGooglePay`, () => ({
     scriptLoaded: false,
     script: null as GooglePayPayPal | null,
     googleConfig: {} as GooglePayConfig,
     paymentsClient: {} as google.payments.api.PaymentsClient,
+    paymentLoading: false,
   }));
 
   const initialize = async () => {
@@ -39,10 +33,7 @@ export const useGooglePay = () => {
     const { getScript } = usePayPal();
     const script = await getScript(currency.value);
 
-    console.log('Initializing Google Pay')
-
     if (!script) return false;
-    console.log('Script loaded 2')
 
     if (!state.value.scriptLoaded) {
       await loadExternalScript();
@@ -50,7 +41,6 @@ export const useGooglePay = () => {
     }
 
     state.value.script = (script as any).Googlepay() as GooglePayPayPal;
-    console.log('Google script loaded')
     state.value.googleConfig = await state.value.script.config();
     state.value.paymentsClient = getPaymentsClient();
 
@@ -78,6 +68,14 @@ export const useGooglePay = () => {
     } as google.payments.api.PaymentDataRequest;
   };
 
+  const showErrorNotification = (message: string) => {
+    useNotification().send({
+      type: 'negative',
+      message,
+    });
+    state.value.paymentLoading = false;
+  };
+
   const processPayment = async (paymentData: google.payments.api.PaymentData) => {
     if (!state.value.script) return;
     const localePath = useLocalePath();
@@ -86,65 +84,53 @@ export const useGooglePay = () => {
     const { shippingPrivacyAgreement } = useAdditionalInformation();
     const { createOrder } = useMakeOrder();
 
+    state.value.paymentLoading = true;
+
     const transaction = await createCreditCardTransaction();
     if (!transaction || !transaction.id) {
       showErrorNotification('Failed to create transaction');
       return;
     }
 
-    console.log('Created transaction')
-
-    console.log('Confirm order', transaction.id, paymentData.paymentMethodData);
     let { status } = await state.value.script.confirmOrder({
       orderId: transaction.id,
       paymentMethodData: paymentData.paymentMethodData,
     });
-    console.log('Order confirmed', status)
 
     if (status === 'PAYER_ACTION_REQUIRED') {
-      console.log('initiatePayerAction')
       await state.value.script.initiatePayerAction({ orderId: transaction.id });
-      console.log('initiatePayerAction finished')
       const paypalOrder = (await getOrder({
         paypalOrderId: transaction.id,
         payPalPayerId: transaction.payPalPayerId,
       })) as any;
-      console.log('paypalOrder', paypalOrder);
       status = paypalOrder?.result?.status || 'ERROR';
     }
 
-    console.log('Order status', status)
-
     if (status === 'APPROVED') {
-      console.log('Capture order')
       await captureOrder({
         paypalOrderId: transaction.id,
         paypalPayerId: transaction.payPalPayerId,
       });
-      console.log('createOrder')
+
       const order = await createOrder({
         paymentId: cart.value.methodOfPaymentId,
         shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
       });
-      console.log('order', order)
+
       if (!order || !order.order || !order.order.id) {
         showErrorNotification('Failed to create plenty order');
         return;
       }
 
-      const executedOrder = await executeOrder({
+      await executeOrder({
         mode: 'paypal',
         plentyOrderId: Number.parseInt(orderGetters.getId(order)),
         paypalTransactionId: transaction.id,
       });
 
-      if (!executedOrder) {
-        showErrorNotification('Failed to execute order');
-        return;
-      }
-
       clearCartItems();
       navigateTo(localePath(paths.confirmation + '/' + order.order.id + '/' + order.order.accessKey));
+      state.value.paymentLoading = false;
 
       return { transactionState: 'SUCCESS' };
     } else {
