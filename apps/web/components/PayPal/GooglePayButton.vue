@@ -11,10 +11,10 @@ const emits = defineEmits<{
 }>();
 
 async function onGooglePaymentButtonClicked() {
+  /*
   console.log('onGooglePaymentButtonClicked2')
   await emits('button-clicked', async (successfully) => {
     if (successfully) {
-      /*
      const paymentDataRequest = getGooglePaymentDataRequest();
      console.log('paymentDataRequest', paymentDataRequest)
      paymentsClient.value
@@ -31,9 +31,9 @@ async function onGooglePaymentButtonClicked() {
        .catch((error) => {
          console.error(error);
        });
-      */
     }
   });
+  */
 }
 
 const addGooglePayButton = () => {
