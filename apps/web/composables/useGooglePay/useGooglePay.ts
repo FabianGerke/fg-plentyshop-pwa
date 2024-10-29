@@ -60,15 +60,15 @@ export const useGooglePay = () => {
   const getGoogleTransactionInfo = () => {
     const { data: cart } = useCart();
     const currency = computed(() => cartGetters.getCurrency(cart.value) || (useAppConfig().fallbackCurrency as string));
-    return {
+    return JSON.parse(JSON.stringify({
       countryCode: state.value.googleConfig.countryCode,
       currencyCode: currency.value,
       totalPriceStatus: 'FINAL',
       totalPrice: cartGetters.getTotals(cart.value).total.toString(),
-    } as google.payments.api.TransactionInfo;
+    })) as google.payments.api.TransactionInfo;
   };
 
-  const getGooglePaymentDataRequest = async () => {
+  const getGooglePaymentDataRequest = () => {
     const { allowedPaymentMethods, merchantInfo } = state.value.googleConfig;
     return JSON.parse(JSON.stringify({
       apiVersion: 2,

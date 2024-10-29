@@ -14,7 +14,7 @@ const onGooglePaymentButtonClicked = async () => {
   console.log('onGooglePaymentButtonClicked')
   await emits('button-clicked', async (successfully) => {
     if (successfully) {
-      const paymentDataRequest = await getGooglePaymentDataRequest();
+      const paymentDataRequest = getGooglePaymentDataRequest();
       console.log('paymentDataRequest', paymentDataRequest)
       paymentsClient.value
         .loadPaymentData(paymentDataRequest)
@@ -36,7 +36,8 @@ const onGooglePaymentButtonClicked = async () => {
 
 const addGooglePayButton = () => {
   try {
-    console.log('addGooglePayButton');
+    console.log('addGooglePayButton', paymentsClient.value);
+    console.log('onGooglePaymentButtonClicked', onGooglePaymentButtonClicked)
     const button = paymentsClient.value.createButton({
       onClick: onGooglePaymentButtonClicked,
     });
