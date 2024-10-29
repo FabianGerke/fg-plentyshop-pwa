@@ -46,16 +46,8 @@ const addGooglePayButton = () => {
 
 const onGooglePayLoaded = async () => {
   try {
-    console.log('request', {
-      allowedPaymentMethods: googleConfig.value.allowedPaymentMethods,
-      apiVersion: googleConfig.value.apiVersion,
-      apiVersionMinor: googleConfig.value.apiVersionMinor,
-    });
-    const response = await paymentsClient.value.isReadyToPay({
-      allowedPaymentMethods: googleConfig.value.allowedPaymentMethods,
-      apiVersion: googleConfig.value.apiVersion,
-      apiVersionMinor: googleConfig.value.apiVersionMinor,
-    });
+    console.log('getIsReadyToPayRequest', getIsReadyToPayRequest());
+    const response = await paymentsClient.value.isReadyToPay(getIsReadyToPayRequest());
     console.log('onGooglePayLoaded', response)
     if (response.result) {
       addGooglePayButton();

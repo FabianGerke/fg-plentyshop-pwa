@@ -70,13 +70,13 @@ export const useGooglePay = () => {
 
   const getGooglePaymentDataRequest = async () => {
     const { allowedPaymentMethods, merchantInfo } = state.value.googleConfig;
-    return {
+    return JSON.parse(JSON.stringify({
       apiVersion: 2,
       apiVersionMinor: 0,
       allowedPaymentMethods,
       transactionInfo: getGoogleTransactionInfo(),
       merchantInfo,
-    } as google.payments.api.PaymentDataRequest;
+    })) as google.payments.api.PaymentDataRequest;
   };
 
   const processPayment = async (paymentData: google.payments.api.PaymentData) => {
@@ -147,7 +147,7 @@ export const useGooglePay = () => {
     return {
       apiVersion: 2,
       apiVersionMinor: 0,
-      allowedPaymentMethods: state.value.googleConfig.allowedPaymentMethods,
+      allowedPaymentMethods: JSON.parse(JSON.stringify(state.value.googleConfig.allowedPaymentMethods)),
     } as google.payments.api.IsReadyToPayRequest;
   }
 
