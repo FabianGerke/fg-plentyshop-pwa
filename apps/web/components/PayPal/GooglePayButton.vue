@@ -11,13 +11,11 @@ const emits = defineEmits<{
 }>();
 
 async function onGooglePaymentButtonClicked() {
-  /*
-  console.log('onGooglePaymentButtonClicked2')
   await emits('button-clicked', async (successfully) => {
     if (successfully) {
      const paymentDataRequest = getGooglePaymentDataRequest();
      console.log('paymentDataRequest', paymentDataRequest)
-     paymentsClient.value
+      toRaw(paymentsClient.value)
        .loadPaymentData(paymentDataRequest)
        // eslint-disable-next-line promise/always-return
        .then((paymentData: google.payments.api.PaymentData) => {
@@ -33,7 +31,6 @@ async function onGooglePaymentButtonClicked() {
        });
     }
   });
-  */
 }
 
 const addGooglePayButton = () => {
