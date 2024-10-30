@@ -153,6 +153,7 @@ const {
 onNuxtReady(async () => {
   if (process.client) {
     await useGooglePay().checkIsEligible();
+    await useApplePay().checkIsEligible();
   }
   useFetchAdddress(AddressType.Shipping)
     .fetchServer()
