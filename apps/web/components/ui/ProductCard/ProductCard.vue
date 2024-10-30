@@ -22,8 +22,8 @@
           :loading="lazy && !priority ? 'lazy' : 'eager'"
           :fetchpriority="priority ? 'high' : 'auto'"
           :preload="priority || false"
-          :width="imageWidth"
-          :height="imageHeight"
+          :width="getWidth()"
+          :height="getHeight()"
           class="object-contain rounded-md aspect-square w-full"
           data-testid="image-slot"
         />
@@ -96,6 +96,7 @@
 import { productGetters } from '@plentymarkets/shop-api';
 import { SfLink, SfIconShoppingCart, SfLoaderCircular, SfRating, SfCounter } from '@storefront-ui/vue';
 import type { ProductCardProps } from '~/components/ui/ProductCard/types';
+import { defaults } from '~/composables';
 
 const localePath = useLocalePath();
 const { t, n } = useI18n();
@@ -122,18 +123,28 @@ const {
 const { data: categoryTree } = useCategoryTree();
 const { openQuickCheckout } = useQuickCheckout();
 const { addToCart } = useCart();
-const { send } = useNotification();
 const { price, crossedPrice } = useProductPrice(product);
-
+const { send } = useNotification();
 const loading = ref(false);
 const runtimeConfig = useRuntimeConfig();
 const showNetPrices = runtimeConfig.public.showNetPrices;
-
 const path = computed(() => productGetters.getCategoryUrlPath(product, categoryTree.value));
 const productSlug = computed(() => productGetters.getSlug(product) + `_${productGetters.getItemId(product)}`);
 const productPath = computed(() => localePath(`${path.value}/${productSlug.value}`));
+const getWidth = () => {
+  if (imageWidth && imageWidth > 0 && imageUrl.includes(defaults.IMAGE_LINK_SUFIX)) {
+    return imageWidth;
+  }
+  return '';
+};
+const getHeight = () => {
+  if (imageHeight && imageHeight > 0 && imageUrl.includes(defaults.IMAGE_LINK_SUFIX)) {
+    return imageHeight;
+  }
+  return '';
+};
 
-const addWithLoader = async (productId: number) => {
+const addWithLoader = async (productId: number, quickCheckout = true) => {
   loading.value = true;
 
   try {
@@ -141,9 +152,11 @@ const addWithLoader = async (productId: number) => {
       productId: productId,
       quantity: 1,
     });
-
-    openQuickCheckout(product, 1);
-    send({ message: t('addedToCart'), type: 'positive' });
+    if (quickCheckout) {
+      openQuickCheckout(product, 1);
+    } else {
+      send({ message: t('addedToCart'), type: 'positive' });
+    }
   } finally {
     loading.value = false;
   }
