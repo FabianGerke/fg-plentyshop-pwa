@@ -150,15 +150,23 @@ const {
   handlePaymentMethodUpdate,
 } = useCheckoutPagePaymentAndShipping();
 
-onNuxtReady(async () => {
+const checkPayPalPaymentsEligible = async () => {
   if (import.meta.client) {
     const googlePayAvailable = await useGooglePay().checkIsEligible();
     const applePayAvailable = await useApplePay().checkIsEligible();
 
+    console.log('googlePayAvailable', googlePayAvailable);
+    console.log('applePayAvailable', applePayAvailable);
+
     if (googlePayAvailable || applePayAvailable) {
+      console.log('Fetch payment methods')
       await usePaymentMethods().fetchPaymentMethods();
+      console.log('Fetch payment methods done')
     }
   }
+};
+
+onNuxtReady(async () => {
   useFetchAdddress(AddressType.Shipping)
     .fetchServer()
     .then(() => persistShippingAddress())
@@ -168,6 +176,8 @@ onNuxtReady(async () => {
     .fetchServer()
     .then(() => persistBillingAddress())
     .catch((error) => useHandleError(error));
+
+  await checkPayPalPaymentsEligible();
 });
 
 await getCart().then(
