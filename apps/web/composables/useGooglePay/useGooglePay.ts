@@ -16,7 +16,7 @@ const getPaymentsClient = () => {
   const { config } = usePayPal();
 
   return new google.payments.api.PaymentsClient({
-    environment: config.value ? paypalGetters.isProduction(config.value) ? 'PRODUCTION' : 'TEST' : 'TEST',
+    environment: config.value ? (paypalGetters.isProduction(config.value) ? 'PRODUCTION' : 'TEST') : 'TEST',
   });
 };
 
@@ -160,9 +160,10 @@ export const useGooglePay = () => {
             state.value.googleConfig.allowedPaymentMethods,
           ) as PayPalGooglePayAllowedPaymentMethod[],
         });
-        await usePaymentMethods().fetchPaymentMethods();
+        return true;
       }
     }
+    return false;
   };
 
   return {

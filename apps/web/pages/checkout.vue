@@ -151,9 +151,8 @@ const {
 } = useCheckoutPagePaymentAndShipping();
 
 onNuxtReady(async () => {
-  if (process.client) {
-    await useGooglePay().checkIsEligible();
-    await useApplePay().checkIsEligible();
+  if (import.meta.client && ((await useGooglePay().checkIsEligible()) || (await useApplePay().checkIsEligible()))) {
+    await usePaymentMethods().fetchPaymentMethods();
   }
   useFetchAdddress(AddressType.Shipping)
     .fetchServer()

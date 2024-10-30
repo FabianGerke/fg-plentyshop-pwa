@@ -1,5 +1,5 @@
-import {cartGetters, orderGetters, PayPalGooglePayAllowedPaymentMethod} from "@plentymarkets/shop-api";
-import {ApplepayType, ConfigResponse} from "~/components/PayPal/types";
+import { cartGetters, orderGetters } from '@plentymarkets/shop-api';
+import { ApplepayType, ConfigResponse } from '~/components/PayPal/types';
 
 const loadExternalScript = async () => {
   return new Promise((resolve, reject) => {
@@ -98,7 +98,7 @@ export const useApplePay = () => {
             paymentId: cart.value.methodOfPaymentId,
             shippingPrivacyHintAccepted: shippingPrivacyAgreement.value,
           });
-          if (!order || !order.order || !order.order.id)  {
+          if (!order || !order.order || !order.order.id) {
             showErrorNotification('Order creation failed');
             return;
           }
@@ -142,14 +142,19 @@ export const useApplePay = () => {
   };
 
   const checkIsEligible = async () => {
-    if (await initialize()) {
-      if (state.value.script && ApplePaySession && ApplePaySession.canMakePayments() && state.value.config.isEligible) {
-        await useSdk().plentysystems.doHandleAllowPaymentApplePay({
-          canMakePayments: true,
-        });
-        await usePaymentMethods().fetchPaymentMethods();
-      }
+    if (
+      (await initialize()) &&
+      state.value.script &&
+      ApplePaySession &&
+      ApplePaySession.canMakePayments() &&
+      state.value.config.isEligible
+    ) {
+      await useSdk().plentysystems.doHandleAllowPaymentApplePay({
+        canMakePayments: true,
+      });
+      return true;
     }
+    return false;
   };
 
   return {
@@ -157,5 +162,5 @@ export const useApplePay = () => {
     checkIsEligible,
     processPayment,
     ...toRefs(state.value),
-  }
+  };
 };

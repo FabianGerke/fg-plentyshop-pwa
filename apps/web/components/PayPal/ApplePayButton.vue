@@ -5,33 +5,29 @@
 <script lang="ts" setup>
 import { PayPalAddToCartCallback } from '~/components/PayPal/types';
 
-const { initialize, config, script, processPayment } = useApplePay();
-const localePath = useLocalePath();
+const { initialize, config, processPayment } = useApplePay();
 const emits = defineEmits<{
   (event: 'button-clicked', callback: PayPalAddToCartCallback): Promise<void>;
 }>();
 
 const renderButton = async () => {
-  if (await initialize()) {
-    if (config.value.isEligible) {
-      const applePayButtonContainer = document.querySelector('#apple-pay-button');
-      if (applePayButtonContainer) {
-        applePayButtonContainer.innerHTML =
-          '<apple-pay-button id="btn-appl" buttonstyle="black" type="buy" locale="en" />';
+  if ((await initialize()) && config.value.isEligible) {
+    const applePayButtonContainer = document.querySelector('#apple-pay-button');
+    if (applePayButtonContainer) {
+      applePayButtonContainer.innerHTML =
+        '<apple-pay-button id="btn-appl" buttonstyle="black" type="buy" locale="en" />';
 
-        const applePayButton = document.querySelector('#btn-appl');
-        if (applePayButton) {
-          applePayButton.addEventListener('click', async () => {
-            await emits('button-clicked', async (successfully) => {
-              if (successfully) {
-                processPayment();
-              }
-            });
+      const applePayButton = document.querySelector('#btn-appl');
+      if (applePayButton) {
+        applePayButton.addEventListener('click', async () => {
+          await emits('button-clicked', async (successfully) => {
+            if (successfully) {
+              processPayment();
+            }
           });
-        }
+        });
       }
     }
-    return null;
   }
 };
 
