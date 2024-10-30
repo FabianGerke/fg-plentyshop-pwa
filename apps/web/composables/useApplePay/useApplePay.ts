@@ -57,7 +57,7 @@ export const useApplePay = () => {
       requiredBillingContactFields: ['postalAddress'],
       total: {
         type: 'final',
-        label: 'Here we need the Shop Name',
+        label: useRuntimeConfig().public.storename ?? 'plentyshop PWA',
         amount: cartGetters.getTotals(cart.value).total.toString(),
       },
     } as ApplePayJS.ApplePayPaymentRequest;
@@ -144,6 +144,7 @@ export const useApplePay = () => {
   const checkIsEligible = async () => {
     if (
       (await initialize()) &&
+      ApplePaySession !== undefined &&
       state.value.script &&
       ApplePaySession &&
       ApplePaySession.canMakePayments() &&
