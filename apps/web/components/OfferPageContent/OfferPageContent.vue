@@ -7,6 +7,9 @@
   >
     <div v-if="offer" class="md:grid md:grid-cols-12 md:gap-x-6">
       <div class="col-span-7 mb-10 md:mb-0">
+        <h1 v-if="validUntil" class="px-4 py-6 font-medium">
+          {{ t('offerForm.offerValidUntil', { date: validUntil }) }}
+        </h1>
         <UiDivider class="w-screen md:w-auto -mx-4 md:mx-0" />
         <div class="px-4 py-6">
           <h1 class="font-bold text-lg mb-2">{{ $t('contactInfo.heading') }}</h1>
@@ -48,11 +51,11 @@
         <div class="text-sm mx-4 md:pb-0">
           <div class="flex items-center">
             <SfCheckbox
+              id="terms-checkbox"
               v-model="termsAccepted"
               :invalid="showTermsError"
-              @change="showTermsError = false"
-              id="terms-checkbox"
               class="inline-block mr-2"
+              @change="showTermsError = false"
             />
             <div>
               <i18n-t keypath="termsInfo" scope="global">
@@ -106,10 +109,10 @@
             <OrderTotals :order="offer" />
             <UiButton
               type="submit"
-              @click="order"
               :disabled="offerLoading"
               size="lg"
               class="w-full mb-4 md:mb-0 cursor-pointer mt-4"
+              @click="order"
             >
               <SfLoaderCircular v-if="offerLoading" class="flex justify-center items-center" size="sm" />
               <span v-else>
@@ -120,9 +123,9 @@
               type="submit"
               variant="secondary"
               :disabled="offerLoading"
-              @click="toggleModal"
               size="lg"
               class="w-full mt-4 md:mb-0 cursor-pointer"
+              @click="toggleModal"
             >
               <SfLoaderCircular v-if="offerLoading" class="flex justify-center items-center" size="sm" />
               <span v-else>
@@ -132,9 +135,9 @@
           </div>
 
           <UiModal
+            v-model="openModal"
             class="h-full w-full overflow-auto md:w-[700px] md:h-fit"
             aria-labelledby="address-modal-title"
-            v-model="openModal"
           >
             <UiButton square variant="tertiary" class="absolute right-2 top-2" @click="toggleModal">
               <SfIconClose />
@@ -143,8 +146,8 @@
             <p class="mb-4">{{ t('offerForm.declineDialogSubline') }}</p>
             <p>{{ t('returns.commentOptional') }}</p>
             <textarea
-              class="w-full min-h-32 md:min-w-96 border-2 rounded-md p-4"
               v-model="declineText"
+              class="w-full min-h-32 md:min-w-96 border-2 rounded-md p-4"
               :placeholder="t('offerForm.inputPlaceholder')"
             />
             <div class="flex space-x-4">
@@ -152,9 +155,9 @@
                 type="submit"
                 variant="secondary"
                 :disabled="offerLoading"
-                @click="toggleModal"
                 size="lg"
                 class="w-full mt-4 md:mb-0 cursor-pointer"
+                @click="toggleModal"
               >
                 <SfLoaderCircular v-if="offerLoading" class="flex justify-center items-center" size="sm" />
                 <span v-else> {{ t('offerForm.cancel') }} </span>
@@ -163,9 +166,9 @@
                 type="submit"
                 variant="primary"
                 :disabled="offerLoading"
-                @click="handleDecline"
                 size="lg"
                 class="w-full mt-4 md:mb-0 cursor-pointer"
+                @click="handleDecline"
               >
                 <SfLoaderCircular v-if="offerLoading" class="flex justify-center items-center" size="sm" />
                 <span v-else> {{ t('offerForm.declineOffer') }} </span>
@@ -182,11 +185,12 @@
 import { offerGetters } from '@plentymarkets/shop-api';
 import { SfLink, SfCheckbox, SfLoaderCircular, SfIconClose } from '@storefront-ui/vue';
 import { paths } from '~/utils/paths';
-import { OfferPageContentProps } from './types';
+import type { OfferPageContentProps } from './types';
+import { scrollToHTMLObject } from '~/utils/scollHelper';
 
 const { loading: offerLoading } = useOffer();
 const { send } = useNotification();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const props = defineProps<OfferPageContentProps>();
 const emit = defineEmits(['accept', 'decline']);
@@ -197,21 +201,9 @@ const termsAccepted = ref(false);
 const showTermsError = ref(false);
 const shippingAddress = computed(() => offerGetters.getShippingAddress(props.offer));
 const billingAddress = computed(() => offerGetters.getBillingAddress(props.offer));
+const validUntil = computed(() => offerGetters.getValidUntil(props.offer, locale.value));
 
 const ID_CHECKBOX = '#terms-checkbox';
-
-const scrollToHTMLObject = (object: string) => {
-  const element = document.querySelector(object) as HTMLElement;
-  const elementOffset = element?.offsetTop ?? 0;
-
-  const headerElement = document.querySelector('header') as HTMLElement;
-  const headerElementOffset = headerElement.offsetHeight ?? 0;
-
-  window.scrollTo({
-    top: elementOffset - headerElementOffset,
-    behavior: 'smooth',
-  });
-};
 
 const validateTerms = (): boolean => {
   showTermsError.value = !termsAccepted.value;

@@ -15,6 +15,11 @@
     },
     "essentials": {
       "cookies": {
+        "payPal": {
+          "name": "paypal",
+          "provider": "PayPal (Europe) S.à r.l. et Cie, S.C.A.",
+          "status": "Required for PayPal payments."
+        },
         "cloudflareTurnstile": {
           "name": "Cloudflare Turnstile",
           "provider": "Cloudflare",
@@ -252,13 +257,6 @@
       "emailAlreadyExists": "This email address is already registered.",
       "heading": "Create an account",
       "logInLinkLabel": "Log in instead",
-      "modal": {
-        "button": "Go Shopping",
-        "description": "Your account has been created. You can {information} to your account now, so you do not have to do this later during your purchase.",
-        "heading": "Welcome",
-        "imageAlt": "Image to confirm successful signup",
-        "information": "add information"
-      },
       "passwordValidation": {
         "characters": "The password must contain at least 8 characters.",
         "letters": "The password must contain at least one letter.",
@@ -341,7 +339,8 @@
   "checkoutPayment": {
     "comingSoon": "Coming soon",
     "creditCard": "Credit Card",
-    "heading": "Payment method"
+    "heading": "Payment method",
+    "noMethodsAvailable": "There are no payment methods available. Please contact the webshop provider."
   },
   "clear": "Clear",
   "clearFilters": "Clear all filters",
@@ -416,9 +415,24 @@
     "correctionDocuments": "Correction Documents"
   },
   "editAddress": "Edit address",
+  "editMode": {
+    "clearJson": "Clear template",
+    "edit": "Edit",
+    "editJsonPlaceholder": "Edit JSON template...",
+    "formatJson": "Format template",
+    "minifyJson": "Minify template",
+    "publish": "Publish",
+    "save": "Save",
+    "stopEdit": "Cancel"
+  },
   "email": "Email",
+  "emailConfirmation": {
+    "newsletterOptInMessage": "Your email address has been confirmed.",
+    "newsletterOptInMessageError": "An error occurred while confirming your email."
+  },
   "emptyCart": "Your cart is empty",
   "emptyCartImgAlt": "Image of an empty cart",
+  "emptyCartNotification": "You don't have any items in your cart",
   "emptyStateAltText": "Image that describes that no products were found",
   "emptyStateText": "We no longer have products in this category.",
   "emptyStateText2": "Have not found what you are looking for?",
@@ -479,6 +493,9 @@
     "notificationsWarningOverselling": "The selected quantity exceeds the available stock. :stock are currently in stock; :oversellingAmount will be supplied later."
   },
   "errorMessages": {
+    "checkout": {
+      "missingAddress": "Please provide your address to continue with the checkout."
+    },
     "contact": {
       "messageRequired": "Message is required.",
       "nameRequired": "Name is required.",
@@ -503,6 +520,7 @@
       "required": "Password is required.",
       "valid": "Password must be at least 8 characters long and include at least one letter and one number."
     },
+    "paymentFailed": "The payment has failed. Please try again.",
     "pleaseFillOutAllFields": "Please fill out all these fields.",
     "requiredField": "This is a mandatory field.",
     "turnstileRequired": "Please check the box to verify that you are human.",
@@ -510,7 +528,7 @@
   },
   "estimatedTax": "VAT",
   "etaDelivery": "Estimated delivery time",
-  "excludedShipping": "excl. Shipping",
+  "excludedShipping": "excl. {shipping}",
   "failedInfoHeader": "We are really sorry.",
   "failedInfoMessage": "Your order has not been completed.",
   "filters": "Filters",
@@ -524,7 +542,6 @@
     "firstNameLabel": "First Name",
     "lastNameLabel": "Last Name",
     "optional": "optional",
-    "passwordHint": "8 or more characters with a mix of letters, numbers and symbols.",
     "passwordLabel": "Password",
     "phoneLabel": "Phone",
     "postalCodeLabel": "Zip Code",
@@ -536,8 +553,6 @@
     "stateLabel": "State",
     "streetNameLabel": "Street",
     "streetNumberLabel": "Number",
-    "subscriptionLabel": "I wish to receive occasional emails about special offers, new products and exclusive promotions. I can cancel my subscription at any time. (Optional)",
-    "termsAndConditionsLabel": "I declare that I have read and accept the {terms}",
     "useAsBillingLabel": "Use as billing address",
     "useAsShippingLabel": "Use as shipping address",
     "vatIdLabel": "VAT ID"
@@ -552,6 +567,9 @@
   "goToCheckout": "Go to checkout",
   "goToHomepage": "Go to Homepage",
   "goToPage": "Navigate to Page {page}",
+  "googlePay": {
+    "paymentInProgress": "Payment in progress..."
+  },
   "graduatedPrices": {
     "discount": "DISCOUNT",
     "price": "PRICE",
@@ -562,6 +580,9 @@
   "home": "Home",
   "homepage": {
     "background": "New Wireless Pro headphones with sleek design and modern features",
+    "emptyBlock": {
+      "headline": "Add the first block here."
+    },
     "banner": {
       "moto1": "Feel the music",
       "moto2": "New Wireless Pro",
@@ -652,7 +673,9 @@
     "noResponsibleInformation": "No information available for Responsible Person",
     "responsibleHeader": "Responsible Person in the EU",
     "responsibleSubtitle": "An economic operator based within the EU who ensures that the product complies with all necessary regulations.",
-    "subtitle": "Manufacturer information includes the address and additional details about the producer of the product."
+    "subtitle": "Manufacturer information includes the address and additional details about the producer of the product.",
+    "contactUrl": "Contact form",
+    "responsibleContactUrl": "EU-Responsible contact form"
   },
   "max": "Max",
   "min": "Min",
@@ -669,7 +692,7 @@
     "lastName": "Last Name",
     "policy": "I hereby confirm that I have read the {privacyPolicy}. I can revoke my consent at any time.",
     "subscribe": "Subscribe To Newsletter",
-    "success": "Newsletter successfully subscribed"
+    "success": "Thank you for signing up! Please check your email inbox and click on the confirmation link in our message to complete your newsletter subscription."
   },
   "next": "Next",
   "nextAriaLabel": "Navigate to next page",
@@ -685,7 +708,8 @@
     "declineOffer": "Decline offer",
     "inputPlaceholder": "Please share your reason for declining...",
     "missingEmail": "No email address has been provided.",
-    "offer": "Offer"
+    "offer": "Offer",
+    "offerValidUntil": "Offer valid until: {date}"
   },
   "openConfigurationDrawer": "Open configuration drawer",
   "openSearchModalButtonLabel": "Open item search",
@@ -700,6 +724,14 @@
     "subTotal": "Subtotal",
     "total": "Total",
     "vat": "VAT"
+  },
+  "orderConfirmationPaymentStatus": {
+    "fullyPaid": "Paid",
+    "overpaid": "Overpaid",
+    "partlyPaid": "Partially paid",
+    "prepaid": "Prepaid",
+    "unknown": "Error retrieving payment status",
+    "unpaid": "Not paid"
   },
   "orderErrorMessage": "Something went wrong. Try again later.",
   "orderErrorProvider": "Unknown response from payment provider: {paymentType}",
@@ -737,7 +769,8 @@
     "unbrandedCvv": "CVV",
     "unbrandedExpirationDate": "Expiration date",
     "unbrandedNameOnCard": "Name on card",
-    "unbrandedPay": "Pay"
+    "unbrandedPay": "Pay",
+    "invalidOrder": "The order cannot be processed. Please try again."
   },
   "perPage": "Per page",
   "phone": "Phone",
@@ -752,7 +785,7 @@
   "procentageSavings": "You save {percent} % on this bundle",
   "productAttributes": {
     "notValidVariation": "Please select a valid variation.",
-    "productInformationMissing": "Product information missing",
+    "productNameMissing": "Product name missing",
     "seeAvailableOptions": "See available options"
   },
   "productDetails": "Product details",
@@ -765,7 +798,8 @@
     "cartContains": "Your cart contains {count} item | Your cart contains {count} items",
     "checkYourCart": "Check your cart",
     "heading": "Added to shopping cart",
-    "subTotal": "Items subtotal"
+    "subTotal": "Items subtotal",
+    "quantity": "Quantity"
   },
   "readLess": "Read less",
   "readMore": "Read more",
@@ -843,7 +877,8 @@
     "addButton": "Add shipping address",
     "description": "Add a shipping address to view shipping details.",
     "heading": "Shipping Address",
-    "methodChanged": "The selected shipping method is not available anymore."
+    "methodChanged": "The selected shipping method is not available anymore.",
+    "noShippingMessage": "No Shipping Information available"
   },
   "shippingAddress": "Shipping address",
   "shippingAddressRequired": "Please select a shipping address.",
@@ -851,7 +886,9 @@
     "description": "Not available until a shipping address is provided.",
     "free": "Free",
     "heading": "Shipping method",
-    "showDataPrivacyAgreementHint": "I agree that my email address and my phone number will be transmitted to {parcelServiceInformation}, so that they can contact me via email or phone in order to determine a delivery date or to communicate status information about the delivery of the shipment. I can revoke this agreement at any time."
+    "noMethodsAvailable": "There are no shipping methods available. Please contact the webshop provider.",
+    "showDataPrivacyAgreementHint": "I agree that my email address and my phone number will be transmitted to {parcelServiceInformation}, so that they can contact me via email or phone in order to determine a delivery date or to communicate status information about the delivery of the shipment. I can revoke this agreement at any time.",
+    "maxDeliveryDays": "Delivery within {days} days"
   },
   "showAllReviews": "Show all reviews",
   "showLess": "Show less",
@@ -877,12 +914,27 @@
     "reviewsUp": "Item reviews ⬆"
   },
   "storefrontError": {
+    "offer": {
+      "expired": "This offer has expired",
+      "openUnauthorized": "You are not authorised to open this offer.",
+      "itemOutOfStock": "At least one item in the offer is no longer in stock.",
+      "alreadyTaken": "This offer has already been used and cannot be used again."
+    },
     "address": {
       "createFailed": "Saving the address has failed.",
       "deleteFailed": "The deletion of the address failed.",
       "validationFailed": "The address is invalid."
     },
     "cart": {
+      "addToBasket": {
+        "itemSetComponentMismatch": "There is a mismatch in the item set components, and it cannot be added to the cart.",
+        "maxItemQuantityReached": "The maximum quantity for this item has been reached and it cannot be added to the cart.",
+        "maxVariationQuantityReached": "The maximum quantity for this variant has been reached and it cannot be added to the cart.",
+        "minVariationQuantityNotReached": "The minimum quantity for this variant has not been reached and cannot be added to the cart.",
+        "notEnoughStockForVariation": "There is insufficient stock available for this variant.",
+        "unknownError": "An unknown error occurred while adding the item. Please try again.",
+        "variationNotFound": "The selected variant was not found and cannot be added to the cart."
+      },
       "failedToRemoveItem": "The item could not be removed.",
       "reachedMaximumQuantity": "Your order exceeds the maximum order quantity of this item."
     },
@@ -926,6 +978,7 @@
   "termsRequired": "You have to agree with the terms and conditions.",
   "tomorrow": "Tomorrow",
   "total": "Total",
+  "unsavedAddress": "The address you entered has not yet been saved. Click Save address to proceed with the checkout.",
   "validation": {
     "heading": "To complete order:",
     "missingBillingAddress": "add billing address",
@@ -940,5 +993,6 @@
     "add": "The item was added to your wish list.",
     "delete": "The item was removed from your wish list."
   },
-  "youAreOfflineText": "It seems you are currently offline, check your internet connection"
+  "youAreOfflineText": "It seems you are currently offline, check your internet connection",
+  "double-tap-zoom": "Double-tap to zoom"
 }

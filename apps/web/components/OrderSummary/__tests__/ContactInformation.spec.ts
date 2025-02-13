@@ -41,7 +41,7 @@ const cart: Cart =   {
   "subAmount": 1,
   "isExportDelivery": true,
   "shopCountryId": 1,
-  "itemWishListIds": [],
+  "itemWishListIds": {},
   "items": [
     {
       "id": 1,
@@ -56,7 +56,8 @@ const cart: Cart =   {
       "setComponents": [],
       "itemType": 1
     }
-  ]
+  ],
+  "maxDeliveryDays": []
 };
 
 describe('<OrderSummary />', () => {

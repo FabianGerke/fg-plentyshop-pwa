@@ -4,12 +4,19 @@ import type {
   PayPalConfigResponse,
   PayPalCreateOrder,
   PayPalExecuteParams,
+  PayPalGetOrderDetailsParams,
 } from '@plentymarkets/shop-api';
 import { paypalGetters } from '@plentymarkets/shop-api';
-import { PayPalLoadScript, PayPalScript } from '~/composables';
 
 const localeMap: Record<string, string> = { de: 'de_DE' };
 const getLocaleForPayPal = (locale: string): string => localeMap[locale] || 'en_US';
+
+const getOrder = async (params: PayPalGetOrderDetailsParams) => {
+  const { data, error } = await useAsyncData(() => useSdk().plentysystems.getPayPalOrderDetails(params));
+  useHandleError(error.value);
+
+  return data.value?.data ?? null;
+};
 
 /**
  * @description Composable for managing PayPal interaction.
@@ -41,15 +48,18 @@ export const usePayPal = () => {
    */
   const loadConfig = async () => {
     if (state.value.loadedConfig) return false;
-    const { data } = await useSdk().plentysystems.getPayPalMerchantAndClientIds();
-
-    if (data) {
-      state.value.config = data ?? null;
-      state.value.isAvailable = !!state.value.config;
-      state.value.loadedConfig = true;
-      return true;
+    try {
+      const { data } = await useSdk().plentysystems.getPayPalMerchantAndClientIds();
+      if (data) {
+        state.value.config = data ?? null;
+        state.value.isAvailable = !!state.value.config;
+        state.value.loadedConfig = true;
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
     }
-    return false;
   };
 
   /**
@@ -72,12 +82,12 @@ export const usePayPal = () => {
           merchantId: paypalGetters.getMerchantId(state.value.config),
           currency: currency,
           dataPartnerAttributionId: 'Plenty_Cart_PWA_PPCP',
-          components: 'messages,buttons,funding-eligibility,card-fields,payment-fields,marks&enable-funding=paylater',
+          components:
+            'applepay,googlepay,messages,buttons,funding-eligibility,card-fields,payment-fields,marks&enable-funding=paylater',
           locale: locale,
           commit: commit,
         });
       } catch {
-        // eslint-disable-next-line unicorn/expiring-todo-comments
         // TODO: Handle error (not loading sdk)
       }
     }
@@ -104,6 +114,7 @@ export const usePayPal = () => {
       return state.value.paypalScript.script;
     }
 
+    state.value.loadingScripts = {};
     state.value.isReady = false;
     state.value.paypalScript = null;
     state.value.loadingScripts[scriptKey] = loadScript(currency, localePayPal, commit)
@@ -113,7 +124,7 @@ export const usePayPal = () => {
         return paypalScript;
       })
       .finally(() => {
-        delete state.value.loadingScripts[scriptKey];
+        delete state.value.loadingScripts.scriptKey;
       });
 
     return state.value.loadingScripts[scriptKey];
@@ -171,7 +182,7 @@ export const usePayPal = () => {
    * @example
    * ``` ts
    * executeOrder({
-   *   mode: 'paypal',
+   *   mode: 'PAYPAL',
    *   plentyOrderId: 1234,
    *   paypalTransactionId: 'UHIhhur3h2rh2',
    * });
@@ -247,6 +258,7 @@ export const usePayPal = () => {
     createCreditCardTransaction,
     captureOrder,
     getScript,
+    getOrder,
     ...toRefs(state.value),
   };
 };

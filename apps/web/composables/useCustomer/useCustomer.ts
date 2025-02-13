@@ -1,4 +1,4 @@
-import type { RegisterParams, SessionResult, UserChangePasswordParams } from '@plentymarkets/shop-api';
+import type { RegisterParams, SessionResult, UserChangePasswordParams, ApiError } from '@plentymarkets/shop-api';
 import type {
   UseCustomerReturn,
   UseCustomerState,
@@ -9,7 +9,6 @@ import type {
   Logout,
   ChangePassword,
 } from '~/composables/useCustomer/types';
-import { ApiError } from '@plentymarkets/shop-api';
 
 /**
  * @description Composable managing Customer data
@@ -22,6 +21,7 @@ import { ApiError } from '@plentymarkets/shop-api';
  * ```
  */
 export const useCustomer: UseCustomerReturn = () => {
+  const { emit } = usePlentyEvent();
   const state = useState<UseCustomerState>(`useCustomer`, () => ({
     data: {} as SessionResult,
     loading: false,
@@ -64,7 +64,7 @@ export const useCustomer: UseCustomerReturn = () => {
     useHandleError(error.value);
     state.value.data = data?.value?.data ?? state.value.data;
     checkUserState();
-    useWishlist().setWishlistItemIds(state.value.data?.basket?.itemWishListIds || []);
+    useWishlist().setWishlistItemIds(Object.values(state.value.data?.basket?.itemWishListIds || []));
 
     state.value.loading = false;
     return state.value.data;
@@ -115,7 +115,13 @@ export const useCustomer: UseCustomerReturn = () => {
     try {
       await useSdk()
         .plentysystems.doLogin({ email: email, password: password })
-        .then(async () => await getSession());
+        .then(async () => {
+          await getSession();
+
+          if (state.value.data?.user) {
+            emit('frontend:login', { user: state.value.data.user });
+          }
+        });
 
       return state.value.isAuthorized;
     } catch (error) {
@@ -162,6 +168,10 @@ export const useCustomer: UseCustomerReturn = () => {
 
     if (data.value) {
       await getSession();
+
+      if (state.value.data?.user) {
+        emit('frontend:signUp', { user: state.value.data.user });
+      }
     }
 
     return data.value?.data ?? null;
@@ -197,6 +207,7 @@ export const useCustomer: UseCustomerReturn = () => {
     register,
     loginAsGuest,
     changePassword,
+    showNetPrices: state?.value?.data?.user?.showNetPrices,
     ...toRefs(state.value),
   };
 };

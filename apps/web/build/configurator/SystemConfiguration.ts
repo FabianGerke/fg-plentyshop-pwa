@@ -1,6 +1,7 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import type { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 import https from 'node:https';
-import { ConfigurationResponse, BaseColors, Languages } from './types';
+import type { ConfigurationResponse, BaseColors, Languages } from './types';
 
 export class SystemConfiguration {
   private axiosRequestConfig: AxiosRequestConfig = {
@@ -40,7 +41,7 @@ export class SystemConfiguration {
           : this.findValueInResponseByKey('styling', 'primary'),
       secondary:
         this.findValueInResponseByKey('styling', 'secondary') === ''
-          ? '#008ebd'
+          ? '#31687d'
           : this.findValueInResponseByKey('styling', 'secondary'),
     };
   }

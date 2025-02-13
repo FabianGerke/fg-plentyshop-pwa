@@ -24,7 +24,6 @@ const main = async () => {
     const dataWriter = new DataToFileWriter(BuildLoggerInstance);
     const appConfigurator = new AppConfigurator(dataWriter, BuildLoggerInstance);
     appConfigurator.generateEnvironment(systemConfiguration.getResponse());
-    appConfigurator.generateScssVariables(systemConfiguration.getBaseColors());
     appConfigurator.generateLanguageFiles(systemConfiguration.getLanugages());
 
     const cdnWriter = new CdnToFileWriter(BuildLoggerInstance);
@@ -36,7 +35,6 @@ const main = async () => {
   }
 };
 
-// eslint-disable-next-line etc/no-implicit-any-catch
 await main().catch((error: Error) => {
   BuildLoggerInstance.error('An error occurred:', error);
 });

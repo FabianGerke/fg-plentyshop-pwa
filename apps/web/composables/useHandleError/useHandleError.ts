@@ -1,4 +1,4 @@
-import { NuxtError } from 'nuxt/app';
+import type { NuxtError } from 'nuxt/app';
 import type { UseHandleError } from '~/composables/useHandleError/types';
 import { ApiError } from '@plentymarkets/shop-api';
 
@@ -30,8 +30,7 @@ export const useHandleError: UseHandleError = (error: ApiError | NuxtError<unkno
         persist,
       });
     } else {
-      const nuxtError = error as any;
-      const message = `${nuxtError?.status}: ${nuxtError.statusText}`;
+      const message = $i18n.t('storefrontError.unknownError');
 
       send({
         type,

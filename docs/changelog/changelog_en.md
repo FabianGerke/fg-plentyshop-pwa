@@ -1,40 +1,264 @@
-# Changelog plentyshopPWA
+# Changelog PlentyONE Shop
 
-## v1.x.x (yyyy-mm-dd)
-
-- Added tax and shipping note in wishlist page
-- Added new carousel compoment via Swipper library
-- Created new useCarousel composable holding Carousel logic
-- Minified and purged swiper css files for speed optimization
-- Fluid logo container + max-width and max-height addaptation
+# v1.x.x (2025-xx-xx)
 
 ### New
 
-- When an EU country is selected as the shipping country, all EU countries become available as billing options.
-- Added a new request header for configId and added no cache to environment variables.
-- Implement new notification design
-- Adding the ability to have alt text for images.
-- It's now possible to change the font color of the hero banner via a template property.
-
-### 🩹 Fixed
-
-- Fixed an issue where increasing quantity over maximum stock will lead to cart being cleared.
-- Removed the "Add to Cart" notification from the item and category pages when the quick checkout modal is not present.
-- Fixed an accessibility issue where the font size was too small.
-- Fixed an issue where product path was not reactive when category was changed.
-- Automatically generate a language file for every active language, not just the default language.
-- Soft login was still shown after successfully authenticating on the order confirmation page.
-- Fixed an issue where manufacturer data was introducing 'name' into structured data instead of 'externalName'.
-- Headlines now use the configured font.
-- Fixed layout shift on category page.
+- Added recommended products block editing.
+- Dynamic blocks register.
+- Added slider edit.
+- Added block editing by position & typescipt restructuring
+- Fetch color settings at runtime instead of build time.
+- Added robots for static pages.
+- Adding saving functionality for site settings.
+- You can now add blocks on homepage from the blocks side nav!
+- Added the option to opt-out cookies in the cookie bar when the cookie is not in the "Necessary" group.
+- Added the logic to remove cookies after revoking consent.
+- Added a new placeholder block component to showcase to the user where his block will go
+- You can now add blocks on homepage from the blocks side nav
+- Added shipping page no configuration fallback text
+- Image Text Form integrated and two way data binded
+- Added newsletter form to the block settings.
+- Added the `shop-core` module to the project.
+- Automated tests for Image Text
+- Automated tests for Newsletter Form.
+- Color picker labels now have border
+- Automated tests for Text Card Form
+- Added site settings test
+- Integrated Google Analytics module [shop-module-gtag](https://github.com/plentymarkets/shop-module-gtag).
 
 ### 👷 Changed
 
-- The `height` and `width` attributes that where set in terra ui are used only for full size images of an item.
-- Generating missing language files based on the language configuration from the environment has been moved to the build script. The locale configuration is now based on the language files in the `lang` directory.
-- Started to unify the SDK/API error handling. Errors do now return keys that can be translated in the frontend.
-- Manufacturer visual improvments
-- Changed manufacturer translation text.
+- Incomplete PayPal setup will no longer throw an alert in the ui. The error is suppressed and only logged in the browser console.
+
+### 🩹 Fixed
+
+- Fixed an issue where page elements changed during navigation.
+- Fixed accessibility erros in edit mode.
+- Fixed an issue where the site settings view was only displayed on the second click.
+- Fixed an issue where the new block placeholder got displayed when editing the site settings.
+- Fixed an issue where multiple sliders placed in one page ware not controlled independently via control arrows.
+- Fixed slider navigation bullet points.
+- Fixed default editor colors.
+- Fixed the image-to-text ratio in the Image Text block, so that both now take up 50% of the available space.
+- Close edit drawer on block removal.
+- Fixed index error on first block add.
+
+## v1.9.1 (2025-01-29) <a href="https://github.com/plentymarkets/plentyshop-pwa/compare/v1.9.0...v1.9.1" target="_blank" rel="noopener"><b>Overview of all changes</b></a>
+
+### 📙 Todo
+
+- We moved our packages `shop-api` and `tailwind-colors` from GitHub's registry to npm's registry.
+  We no longer require a GitHub token to access these packages.
+  - Run `yarn setup:unix` or `yarn setup:windows` and press y to remove the `.yarnrc.yml`.
+  - Remove `NPM_AUTH_TOKEN` from your `apps/web/.env` file.
+
+### New
+
+- Added ability to change primary and secondary colors from Site Configuration Drawer.
+- Added site configuration drawer.
+- Added blocks drawer.
+- Added multiselect component that allows searching through the options.
+- Added preview functionality for block sizes.
+- If there are unsaved changes in the editor and the user tries to close or reload the page, the browser will now display a warning and ask for confirmation.
+- Adding saving functionality for site settings.
+
+### 👷 Changed
+
+- Changed footer background for automatic coloring.
+- Changed editor save button disable logic to account for changes in the settings.
+
+### 🩹 Fixed
+
+- Fixed a hydration error when fetching recommended products on the homepage.
+- Fixed an issue that disabled the save button even though the user has edited the homepage template.
+- Removed the `nuxt-security` module for now due to issues with PayPal.
+- Fixed an issue with PayPal Express Checkout where it would require you to reauthorize the payment.
+- Fixed an accesibility issue on banner.
+
+## v1.9.0 (2025-01-23) <a href="https://github.com/plentymarkets/plentyshop-pwa/compare/v1.8.0...v1.9.0" target="_blank" rel="noopener"><b>Overview of all changes</b></a>
+
+### New
+
+- The [Nuxt security module](https://nuxt-security.vercel.app/) has been added to the web app.
+- The web app is now equipped to [render components from a module](https://pwa-docs.plentymarkets.com/guide/how-to/module/inject-components) in designated areas of the shop.
+- The shop now has a dedicated legal information page for shipping information. You can link a category inside the Online Store Section of the Shops Configuration. The template configured on that category is used for the pages content. The URL for the page is /shipping.
+- In the checkout, shipping providers now include expected delivery dates.
+- The configured robots value on a category in the Terra back end, is now used for the robots meta tag of that category in the front end.
+- Product pages now contain canonical URLs.
+- The recommended products block now optionally includes a pretitle, title, subtitle, and description.
+
+### 👷 Changed
+
+- The `UiHeroCarousel` template now displays the provided image as a banner across the width of the page. The component now also contains additional settings.
+  - _Experimental_: The carousel can now use [Blaze Slider](https://blaze-slider.dev/) instead of [SwiperJS](https://swiperjs.com/). This may have an impact on performance and Core Web Vitals. We're still evaluation which library to prefer. At the moment, it's possible to toggle between them with a runtime configuration.
+- The `UiMediaCard` component has been renamed to `UiImageText`. The template has been updated to always reserve space for an image. The text-only variation has been extracted to `UiTextCard`.
+- The Newsletter now uses the template JSON for configuration instead of the runtime configuration.
+- The save button in the editor is now disabled if no changes have been made to the template or if the template is invalid.
+- Updated cookie handling for PayPal: PayPal functionality now relies on an essential cookie, removing the need for user consent to enable it.
+
+### 🩹 Fixed
+
+- Prices now always displays an asterisk to refer to additional VAT and shipping information
+- Fixed the direction of accordion arrows on product pages.
+- Fixed an issue where the required attributes notification blocked the cart.
+- Fixed a visual inconsistency in the category filters sidebar.
+- Fixed an accesibility error caused by missing label on clear filters.
+- Fixed a warning about using the same text in alt and title on the category page.
+- Fixed the number of max visible pages on mobile pagination.
+- Fixed the product gallery thumbnail image alternate text.
+- The homepage now displays recommended products on initial load.
+- Fixed an issue where only the first template block selected in the editor is editable.
+- Fixed an issue where the editor's language selector displayed an inverted data template.
+- When the multilingualism configuration of the remote shop doesn't include English or German, the corresponding language file is now removed at build time. As a result, the language isn't displayed in the language selector.
+- Fixed an issue where calling `useRoute` within middleware could lead to misleading results.
+
+## v1.8.0 (2024-12-13) <a href="https://github.com/plentymarkets/plentyshop-pwa/compare/v1.7.0...v1.8.0" target="_blank" rel="noopener"><b>Overview of all changes</b></a>
+
+### New
+
+- Users can now edit the homepage from within the shop. This includes adding, editing and deleting individual blocks. Supported block types include Hero Slider, Media Card, Recommended Product gallery, and Newsletter.
+- Categories with visibility "After login" now redirect to the login when accessed by a guest user.
+- Category pages now support filtering products by rating.
+- Users can now zoom in on product images by hovering over them. Double-tapping and pinch zooming are supported on mobile.
+- The legal details drawer now includes more manufacturer information.
+- Additional settings from the SEO configuration are now supported in the app. This includes dynamic structured data and robots settings.
+- The offer page now displays the date until when the offer is valid if it has been set.
+- The checkout now displays a warning if no payment or shipping methods are available.
+- Restricting guest user access to pages is now handled via a middleware.
+- The PWA cookie hash has been added to the SDK client.
+- When navigating between pages, an animation now indicates the loading progress.
+- New styles for toolbar
+- New styles for blocks actions
+- Users can now move a block up or down in the block list.
+- Added a new placeholder block component to showcase to the user where his block will go
+- Added a text card form for edit settings
+
+### 👷 Changed
+
+- Cookie handling for PayPal now relies on a functional cookie requiring user consent ([see docs for details](https://pwa-docs.plentymarkets.com/guide/how-to/cookie#read-and-react-to-a-registered-cookie)). Users will see a message prompting consent when functionality is unavailable due to missing consent.
+- When a user changes their cookie consent settings, the page now only reloads if a cookie has been revoked.
+- The user session is now the source for `showNetPrices`.
+- When subscribing to the newsletter, users now have to confirm the subscription via email.
+- The address preview details now include the country name.
+- The size of the quantity labels in the quick checkout has been adjusted on desktop to improve accessibility.
+- The order of attribute select and order properties on product pages have been switched to better reflect the user flow.
+- The values of attributes are now sorted in descending order by position, then by ID and then alphabetically.
+- The cookie bar has been adjusted to provide a better user experience.
+
+#### GitHub Action: Lighthouse CI
+
+- Lighthouse CI now runs for both mobile and desktop.
+- The lighthouse rules for CLS and DOM size have been updated.
+
+#### GitHub Action: Upload
+
+The **Upload** action now supports deploying the PWA to different environments:
+
+- Production: triggered manually or when creating a GitHub release
+- Staging: triggered manually or when pushing a change to the `main` branch
+
+Each client supports two PWA instances. With this change, you can designate the live instance as the production environment and the preview instance as the staging environment. The production environment uses the GitHub Actions Secret `URL_ENDPOINT_TOKEN`; the staging environment uses the GitHub Actions Secret `URL_ENDPOINT_TOKEN_STAGING`.
+
+### NPM Authentication Token
+
+Instead of creating a `.yarnrc.yml` file manually, you can now use one of the following scripts depending on your operating system:
+
+- Linux/MacOS: `yarn.sh` | `npm run setup:unix`
+- Windows: `yarn.ps1` | `npm run setup:windows`
+
+To run the script, you have to add your GitHub Token with `read:packages` permissions to the environment.
+
+```properties
+# apps/web/.env
+
+NPM_AUTH_TOKEN="<TOKEN>"
+```
+
+### 🩹 Fixed
+
+- Redirect on hidden category after user was logged in.
+- Fixed an unhandled scenario where a blocked payment method remained available during the checkout process
+- Fixed the styling of HTML entered in a PlentyONE system's editor by adding a `no-preflight` CSS class that accounts for Tailwind's preflight configuration.
+- Fixed the checkout layout for tablet screen sizes.
+- Fixed the image quality in the quick checkout by using the middle-size image and adjusting the quantity position.
+- Fixed filter translation on category pages when switching language.
+- Fixed an issue where the shipping costs were not updated during guest checkout process.
+- Fixed an issue causing the login modal to be unresponsive in the user interface.
+- Fixed a misalignment of the sign-up incentives on the registration page.
+- Fixed an issue where the checkout layout button was overlapping the adjacent text.
+- Added a missing href attribute to the cookie bar anchor.
+- Fixed cookie bar usability in landscape mode.
+- Fixed the position of the order property tooltip.
+- Fixed the images sizes loaded on product page.
+- Fixed an issue where the customer class didn't affect prices and categories after login by reloading the page.
+- Fixed when the empty cart notification gets displayed.
+- Fixed an issue where the Hero slider buttons didn't link to the provided target.
+- Fixed an issue where the Buy button could be clicked after the order was finished and the redirect to the confirmation was in progress.
+- Fixed GPSR drawer responsiveness.
+- Fixed accessibility issues by adding the store name to the alt text for the logo.
+- The hero image now uses the alt text specified in the homepage template.
+- The recommended products section on the homepage now uses the category ID from the homepage template.
+- The recommended products section on the homepage is now displayed multiple times if specified.
+- Category products can now be fetched multiple times on the same page.
+- Fixed an issue where review modal was unscrollable on smaller screens.
+- The error message provided has been improved when adding items to the cart that are not available or can't be added for other reasons.
+- Fixed an issue with the PayPal button not being displayed on the checkout.
+- Fixed multiple issues in the PayPal readonly checkout process.
+- Fixed a issue where PayPal payments were stored as "Cash in Advance".
+- The language selector is no longer displayed if only one language is configured.
+- Fixed an issue with category product prices not being updated on page change.
+- Fixed loading times on the homepage by adding SSR.
+- CSS for the Swiper library is now only loaded on pages that use the `HeroCarousel` component.
+- The `HeroCarousel` no longer overlaps the navigation menu on mobile devices.
+- Fixed the height of the hero skeleton to improve CLS.
+- `createOrder` now handles errors more reliably and resets the buy button if an error occurs.
+
+## v1.7.0 (2024-11-06) <a href="https://github.com/plentymarkets/plentyshop-pwa/compare/v1.6.0...v1.7.0" target="_blank" rel="noopener"><b>Overview of all changes</b></a>
+
+### New
+
+- User can now modify shipping address during the read-only checkout process.
+- Google Pay and Apple Pay are now available as payment methods in the checkout.
+- Clicking the **Buy** button with an unsaved address now displays a notification.
+- To ensure compliance with geo-blocking regulations, selecting an EU country as the shipping country now makes all EU countries available as billing options.
+- The product title display now supports custom titles. You can set the custom title on the item. If no custom title is set, the default "Item name | Company name" is used.
+- Added tax and shipping note to the wishlist page.
+- Added a new request header for the `configId`.
+- Added the environment variable `NO_CACHE` for disabling caching.
+- The hero banner and media card now support alt text properties for images.
+- Enabled font color customization for the hero banner via a template property.
+- Added a new carousel compoment.
+- Added an edit mode toolbar and JSON editor for the front end. Note that this is a preparatory step. Further functionality will be added in an upcoming version.
+- Added the image count to the item sitemaps.
+
+### 🩹 Fixed
+
+- Addressed an unhandled scenario in which a guest user attempts to modify their billing address while using the same address for shipping.
+- Fixed an issue where increasing the quantity beyond maximum stock would clear the cart.
+- Removed the "Add to Cart" notification from item and category pages when the quick checkout modal is not present.
+- Improved accessibility for the cart and wishlist pages by increasing the font size.
+- Fixed an issue where the product path was not reactive when the category was changed.
+- The build now automatically generates a language file for every active language, not just the default language.
+- Resolved an issue where the soft login was still shown after successful authentication on the order confirmation page.
+- Corrected manufacturer data to use `externalName` instead of `name` in structured data.
+- Updated headlines to use the configured font.
+- Fixed layout shift on the category page.
+- Resolved build script failure on Windows due to file name pattern incompatibilities.
+- The build script now adds the `API_URL` to the environment if it exists.
+
+### 👷 Changed
+
+- Implemented a new notification design.
+- Increased default notification timeout from 3 to 5 seconds.
+- The `height` and `width` attributes set in Terra UI are now used only for full-size images of an item.
+- Moved the generation of missing language files based on the environment's language configuration to the build script. The locale configuration is now based on the language files in the `lang` directory.
+- Started unifying SDK/API error handling. Errors now return keys that can be translated in the frontend.
+- Improved manufacturer visuals.
+- Updated manufacturer translation text.
+- Added support for a second argument to the payment status on an order. This allows you to define custom translations for different payment states.
+- When trying to access the checkout with an empty cart, or if the user empties the cart during the checkout process, the user is now redirected to the cart.
+- The logo container is now more flexible and adapts to the dimensions of the provided logo.
 
 ## v1.6.0 (2024-10-10) <a href="https://github.com/plentymarkets/plentyshop-pwa/compare/v1.5.0...v1.6.0" target="_blank" rel="noopener"><b>Overview of all changes</b></a>
 
@@ -78,8 +302,8 @@
 
 #### Configuration
 
-- The app can now fetch the Favicon from the plentysystems system.
-- The app can now fetch the logo from the plentysystems system.
+- The app can now fetch the Favicon from the PlentyONE system.
+- The app can now fetch the logo from the PlentyONE system.
 - The app now reads which Google Fonts to use from the environment.
 - The app can now generate a complete Tailwind color palette from a single main color. To use this functionality, enable the `build:before` hook's `generateScssVariables` method and set the environment variables `PRIMARY` and `SECONDARY`. These variables represent the center color of the Tailwind palette, weight `500`. As part of this update, all instances of `SfButton` have been replaced with a new `UiButton` component. Functionally, `UiButton` is identical to `SfButton`, but some color weights were adjusted to work with the generated palettes. ESLint now reports an `error` for `SfButton`. You can disable this rule in `apps/web/eslintrc.cjs`.
 - The app now reads the internationalisation configuration from the environment. This includes the available languages and the default language.
@@ -125,7 +349,7 @@
 - Fixed editing author name on reviews and replies with added e2e.
 - Fixed the issue with the plentyID-cookie in the PWA live preview.
 - Fixed that the PayPal Express button on the product page is only displayed if the item is available for purchase.
-- Fixed that when fetching configurations from plentysystems, the build would only apply updates on the second run.
+- Fixed that when fetching configurations from PlentyONE, the build would only apply updates on the second run.
 - Fixed orphaned form label on product page attributes.
 - Fixed cookie bar privacy link not working properly.
 - Fixed minor styling issues in the credit card form in the checkout and the rating form on the product page.
@@ -297,7 +521,7 @@
 ### Migration guide
 
 - The upload action was changed [.github/workflows/upload.yml](https://github.com/plentymarkets/plentyshop-pwa/compare/v1.3.0...v1.4.0#diff-8cf0b5fae548aab9bd49f5020da9c0e35d281984b82b8a5358ffb1c1ae5bec13L5) update the file to make use of the [config feature](https://pwa-docs.plentymarkets.com/guide/setup/deployment#config)
-- We now require an API Security Token to make requests to the plentysystems API. [setup guide](https://pwa-docs.plentymarkets.com/guide/how-to/middleware#api-security-token)
+- We now require an API Security Token to make requests to the PlentyONE API. [setup guide](https://pwa-docs.plentymarkets.com/guide/how-to/middleware#api-security-token)
 - Category routing has been updated, and the /c prefix has been removed. Please verify that no static URLs in your application still include /c.
   - To accommodate the /c routing change, the [category page](https://github.com/plentymarkets/plentyshop-pwa/compare/v1.3.0...v1.4.0#diff-2f61484eb978aa090fc50dcba90bc44813b45081f25dbff295434cdf6bf219a4) was moved from apps/web/pages/category/[slug].vue to apps/web/pages/[...slug].vue.
 
@@ -359,6 +583,7 @@
 - Fixed the issue where a hard load after language switch leads to a 404 error.
 - Added the missing wishlist navigation button on mobile devices.
 - Fixed the link to the contribution guidelines in the documentation.
+- Refactored index.vue and created a new composable for the blocks
 
 ## New Contributors
 
@@ -458,6 +683,8 @@
 - Added composable that sets canonical url metadata for static pages.
 - Added more default notifications for a variaty of interactions in the PWA
 - Added loading animations where applicable
+- Added empty block component for when there is no data in the json
+- Added a new text component for the homepage
 
 ### Changed
 
