@@ -45,22 +45,20 @@ const useClassFor = (index: number): boolean => foundCookies.length > 1 && index
 
 const removeLookupCookie: RemoveLookupCookie = (index: number): void => {
   const router = useRouter();
+  const { public: config } = useRuntimeConfig();
   const browserCookie = document.cookie.split(';');
   browserCookie.forEach((cookie: string) => {
     const cookiePair = cookie.split('=')
     const name = cookiePair[0].trim()
 
-    console.log(foundCookies[index], name, new RegExp(foundCookies[index]).test(name));
-
     if (new RegExp(foundCookies[index]).test(name)) {
-      console.log(document.cookie);
-      document.cookie += `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC;`
-      console.log(document.cookie);
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${config.apiEndpoint};`
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${config.apiEndpoint};`
     }
   })
 
   bannerIsHidden.value = true;
   foundCookies.splice(index, 1);
-  router.go(0);
+  // router.go(0);
 };
 </script>
