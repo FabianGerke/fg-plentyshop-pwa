@@ -36,13 +36,14 @@
         <div class="border border-1 border-neutral-200 rounded bg-neutral-100 p-4 w-full my-4 text-sm">
           <OrderShippingSummary :order="order" />
           <OrderPaymentSummary :order="order" />
+          <OrderBankDetails v-if="bankDetails" :bank-details="bankDetails" />
         </div>
 
         <div
           v-if="!isAuthorized"
           class="border border-1 border-neutral-200 rounded bg-neutral-100 p-4 w-full mt-4 text-sm items-center flex flex-col"
         >
-          <div class="font-bold text-primary-700 font-headings md:text-lg text-center mt-5">
+          <div class="font-bold text-primary-700 md:text-lg text-center mt-5">
             {{ t('orderConfirmation.saveOrderToAccount') }}
           </div>
           <div class="font-bold text-center mt-3">{{ t('orderConfirmation.createAccountForBenefits') }}</div>
@@ -79,11 +80,11 @@
       </UiButton>
     </header>
     <Register
-      @registered="closeAuthentication"
       :order="order"
       :email-address="orderGetters.getOrderEmail(order)"
       :is-modal="true"
       :changeable-view="false"
+      @registered="closeAuthentication"
     />
   </UiModal>
 </template>
@@ -95,12 +96,14 @@ import type { ConfirmationPageContentProps } from './types';
 import { paths } from '~/utils/paths';
 
 const NuxtLink = resolveComponent('NuxtLink');
-defineProps<ConfirmationPageContentProps>();
+const { order } = defineProps<ConfirmationPageContentProps>();
 const { t } = useI18n();
 const { isOpen: isAuthenticationOpen, toggle: closeAuthentication } = useDisclosure();
 const { isAuthorized } = useCustomer();
 const { getActiveShippingCountries } = useActiveShippingCountries();
 const localePath = useLocalePath();
+const bankDetails = orderGetters.getOrderPaymentBankDetails(order);
+useProcessingOrder().processingOrder.value = false;
 
 await getActiveShippingCountries();
 </script>

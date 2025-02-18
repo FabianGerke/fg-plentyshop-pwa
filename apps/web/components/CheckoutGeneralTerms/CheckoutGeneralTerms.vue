@@ -2,12 +2,12 @@
   <div class="text-sm mx-4 md:pb-0">
     <div class="flex items-center">
       <SfCheckbox
-        :model-value="checkboxValue"
-        @update:model-value="(event) => setCheckboxValue(Boolean(event))"
-        :invalid="showErrors"
         id="terms-checkbox"
+        :model-value="checkboxValue"
+        :invalid="showErrors"
         class="inline-block mr-2"
         data-testid="checkout-terms-checkbox"
+        @update:model-value="(event) => setCheckboxValue(Boolean(event))"
       />
       <label for="terms-checkbox" class="select-none">
         <i18n-t keypath="termsInfo" scope="global">
@@ -43,7 +43,8 @@
         </i18n-t>
       </label>
     </div>
-    <div v-if="showErrors" class="text-negative-700 text-sm mt-2">{{ $t('termsRequired') }}</div>
+    <div class="text-sm text-neutral-500 mt-1 ml-7">* {{ $t('contact.form.asterixHint') }}</div>
+    <div v-if="showErrors" class="text-negative-700 text-sm">{{ $t('termsRequired') }}</div>
   </div>
 </template>
 

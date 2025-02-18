@@ -1,7 +1,6 @@
-import type { FacetSearchCriteria, Product } from '@plentymarkets/shop-api';
-import type { Facet } from '@plentymarkets/shop-api';
+import type { FacetSearchCriteria, Product, Facet } from '@plentymarkets/shop-api';
 import { defaults, type SetCurrentProduct } from '~/composables';
-import type { FetchProducts, UseProductsReturn, UseProductsState } from '~/composables/useProducts/types';
+import type { UseProductsState, FetchProducts, UseProductsReturn } from '~/composables/useProducts/types';
 
 /**
  * @description Composable for managing products.
@@ -11,10 +10,11 @@ import type { FetchProducts, UseProductsReturn, UseProductsState } from '~/compo
  * const { data, loading, productsPerPage, selectedVariation, fetchProducts, selectVariation } = useProducts();
  * ```
  */
-export const useProducts: UseProductsReturn = () => {
-  const state = useState<UseProductsState>('useProducts', () => ({
+export const useProducts: UseProductsReturn = (category = '') => {
+  const state = useState<UseProductsState>(`useProducts${category}`, () => ({
     data: {} as Facet,
     loading: false,
+    checkingPermission: false,
     productsPerPage: defaults.DEFAULT_ITEMS_PER_PAGE,
     currentProduct: {} as Product,
   }));
@@ -25,24 +25,27 @@ export const useProducts: UseProductsReturn = () => {
    * @return FetchProducts
    * @example
    * ``` ts
-   *  fetchProducts({
-   *     page: 1,
-   *     categoryUrlPath: '/living-room'
-   *  });
+   * const { fetchProducts: fetchProducts1, data: productsCatalog1 } = useProducts('/living-room');
+   * const { fetchProducts: fetchProducts2, data: productsCatalog2 } = useProducts('49');
+   * const { fetchProducts: fetchProducts3, data: productsCatalog3 } = useProducts('19');
+   *
+   * fetchProducts1({ categoryUrlPath: '/living-room', page: 1 });
+   * fetchProducts2({ categoryId: '49', page: 1 });
+   * fetchProducts3({ categoryId: '19', page: 1 });
    * ```
    */
   const fetchProducts: FetchProducts = async (params: FacetSearchCriteria) => {
     state.value.loading = true;
-    const { data } = await useAsyncData(() => useSdk().plentysystems.getFacet(params));
+
+    if (params.categoryUrlPath?.endsWith('.js')) return state.value.data;
+
+    const { data } = await useAsyncData(`useProducts-${category}`, () => useSdk().plentysystems.getFacet(params));
 
     state.value.productsPerPage = params.itemsPerPage || defaults.DEFAULT_ITEMS_PER_PAGE;
 
-    if (data.value) data.value.data.pagination.perPageOptions = defaults.PER_PAGE_STEPS;
-
-    state.value.data = data.value?.data ?? state.value.data;
-
-    if (state.value.data?.facets?.length) {
-      state.value.data.facets = state.value.data.facets.filter((facet) => facet.id !== 'feedback');
+    if (data.value?.data) {
+      data.value.data.pagination.perPageOptions = defaults.PER_PAGE_STEPS;
+      state.value.data = data.value.data;
     }
 
     state.value.loading = false;

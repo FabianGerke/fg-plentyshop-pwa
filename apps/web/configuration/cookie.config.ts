@@ -1,25 +1,4 @@
-export interface Cookie {
-  name: string;
-  accepted?: boolean;
-  Lifespan: string;
-  script?: string[];
-  Provider: string;
-  Status: string;
-  PrivacyPolicy: string;
-}
-export interface CookieGroup {
-  id?: number;
-  name: string;
-  accepted: boolean;
-  showMore?: boolean;
-  description: string;
-  cookies: Cookie[];
-}
-export interface CookieGroupFromNuxtConfig {
-  groups: CookieGroup[];
-  barTitle: string;
-  barDescription: string;
-}
+import type { CookieGroupFromNuxtConfig } from '@plentymarkets/shop-core';
 
 export default {
   barTitle: 'CookieBar.about.label',
@@ -32,6 +11,14 @@ export default {
       showMore: false,
       description: 'CookieBar.essentials.description',
       cookies: [
+        {
+          name: 'CookieBar.essentials.cookies.payPal.name',
+          Provider: 'CookieBar.essentials.cookies.payPal.provider',
+          Status: 'CookieBar.essentials.cookies.payPal.status',
+          PrivacyPolicy: '/PrivacyPolicy',
+          Lifespan: 'Session',
+          accepted: true,
+        },
         {
           name: 'CookieBar.essentials.cookies.plentyId.name',
           Provider: 'CookieBar.essentials.cookies.plentyId.provider',
@@ -98,4 +85,4 @@ export default {
       cookies: [],
     },
   ],
-};
+} as CookieGroupFromNuxtConfig;

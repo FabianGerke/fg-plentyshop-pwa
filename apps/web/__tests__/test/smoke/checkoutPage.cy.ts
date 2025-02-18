@@ -26,10 +26,25 @@ describe('Smoke: Checkout Page', () => {
         .goToCheckout()
         .goToGuestCheckout()
         .fillContactInformationForm()
-        .addBillingAddress()
-        .fillBillingAddressForm()
+        .fillShippingAddressForm()
         .acceptTerms()
         .placeOrderButton()
         .displaySuccessPage();
+  });
+
+  it('[smoke] Display "no shipping methods available" when shipping country is Denmark', () => {
+    homePage.goToCategory();
+    productListPage.addToCart()
+
+    cart.openCart();
+    checkout
+      .goToCheckout()
+      .goToGuestCheckout()
+      .fillContactInformationForm()
+      .shouldShowShippingMethods()
+      .fillShippingAddressForm({
+        country: '7'
+      })
+      .shouldNotShowShippingMethods();
   });
 });

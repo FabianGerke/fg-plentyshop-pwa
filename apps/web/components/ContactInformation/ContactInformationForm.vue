@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="onSubmit" data-testid="contact-information-form" novalidate>
+  <form data-testid="contact-information-form" novalidate @submit.prevent="onSubmit">
     <label>
       <UiFormLabel>{{ t('contactInfo.email') }}</UiFormLabel>
       <SfInput
@@ -10,11 +10,11 @@
         type="email"
         autocomplete="email"
       />
-      <VeeErrorMessage as="span" name="cart.customerEmail" class="flex text-negative-700 text-sm mt-2" />
+      <ErrorMessage as="span" name="cart.customerEmail" class="flex text-negative-700 text-sm mt-2" />
     </label>
 
     <div class="mt-4 flex flex-col-reverse md:flex-row md:justify-end">
-      <UiButton @click="resetForm()" type="reset" class="md:mr-4" variant="secondary">
+      <UiButton type="reset" class="md:mr-4" variant="secondary" @click="resetForm()">
         {{ t('contactInfo.clear') }}
       </UiButton>
 
@@ -33,7 +33,8 @@
 
 <script setup lang="ts">
 import { SfInput, SfLoaderCircular } from '@storefront-ui/vue';
-import { useForm } from 'vee-validate';
+import { useForm, ErrorMessage } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/yup';
 import { object, string } from 'yup';
 
 const emit = defineEmits(['on-save']);

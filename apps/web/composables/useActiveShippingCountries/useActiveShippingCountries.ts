@@ -1,7 +1,7 @@
 import type { ActiveShippingCountry } from '@plentymarkets/shop-api';
 import type {
-  UseActiveShippingCountriesReturn,
   UseActiveShippingCountriesState,
+  UseActiveShippingCountriesReturn,
   GetActiveShippingCountries,
 } from './types';
 
@@ -25,16 +25,14 @@ export const useActiveShippingCountries: UseActiveShippingCountriesReturn = () =
   }));
 
   const getActiveShippingCountries: GetActiveShippingCountries = async () => {
-    if (state.value.data.length <= 0) {
-      state.value.loading = true;
+    state.value.loading = true;
 
-      const { data, error } = await useAsyncData('getActiveShippingCountries', () =>
-        useSdk().plentysystems.getActiveShippingCountries(),
-      );
-      useHandleError(error.value);
-      state.value.data = data.value?.data ?? state.value.data;
-      state.value.loading = false;
-    }
+    const { data, error } = await useAsyncData('getActiveShippingCountries', () =>
+      useSdk().plentysystems.getActiveShippingCountries(),
+    );
+    useHandleError(error.value);
+    state.value.data = data.value?.data ?? state.value.data;
+    state.value.loading = false;
 
     return state.value.data;
   };

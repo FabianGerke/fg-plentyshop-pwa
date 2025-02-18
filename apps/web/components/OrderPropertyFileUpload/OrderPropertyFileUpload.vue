@@ -20,12 +20,12 @@
 
     <div
       v-if="!loaded && !loading"
-      class="flex items-center"
       id="drop-area"
+      class="flex items-center"
       @drop="handleDrop"
       @dragover="handleDragOver"
     >
-      <input type="file" ref="uploadForm" hidden @change="handleFileUpload" />
+      <input ref="uploadForm" type="file" hidden @change="handleFileUpload" />
       <div class="w-full">
         <div class="flex items-center">
           <UiButton
@@ -72,7 +72,7 @@
       <slot v-if="hasTooltip" name="tooltip" class="w-[28px]" />
     </div>
 
-    <VeeErrorMessage as="span" name="value" class="flex text-negative-700 text-sm mt-2" />
+    <ErrorMessage as="span" name="value" class="flex text-negative-700 text-sm mt-2" />
   </div>
 </template>
 
@@ -80,7 +80,8 @@
 import { SfInput, SfIconClose, SfLoaderCircular } from '@storefront-ui/vue';
 import { productPropertyGetters } from '@plentymarkets/shop-api';
 import type { OrderPropertyInputProps } from './types';
-import { useForm } from 'vee-validate';
+import { useForm, ErrorMessage } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/yup';
 import { object, string } from 'yup';
 
 const { t, n } = useI18n();

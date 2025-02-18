@@ -3,10 +3,7 @@ import { validateApiUrl } from './utils/pathHelper';
 import cookieConfig from './configuration/cookie.config';
 import { nuxtI18nOptions } from './configuration/i18n.config';
 import { appConfiguration } from './configuration/app.config';
-import fetchConfiguration from './build/fetchConfiguration';
-import generateScssVariables from './build/generateScssVariables';
-import fetchFavicon from './build/fetchFavicon';
-import fetchLogo from './build/fetchLogo';
+import { fontFamilyNuxtConfig } from './configuration/fontFamily.config';
 
 export default defineNuxtConfig({
   telemetry: false,
@@ -19,14 +16,13 @@ export default defineNuxtConfig({
     asyncContext: true,
   },
   appConfig: {
-    titleSuffix: 'plentyshop PWA',
+    titleSuffix: process.env.STORENAME || 'PlentyONE Shop',
     fallbackCurrency: 'GBP',
   },
   imports: {
     dirs: ['composables', 'composables/**', 'utils/**'],
   },
   css: ['~/assets/style.scss'],
-  // eslint-disable-next-line unicorn/expiring-todo-comments
   // TODO: build is consistently failing because of this. check whether we need pre-render check.
   nitro: {
     prerender: {
@@ -38,41 +34,42 @@ export default defineNuxtConfig({
     '/_ipx/**': { headers: { 'cache-control': `public, max-age=31536000, immutable` } },
     '/icons/**': { headers: { 'cache-control': `public, max-age=31536000, immutable` } },
     '/favicon.ico': { headers: { 'cache-control': `public, max-age=31536000, immutable` } },
+    '/images/**': { headers: { 'cache-control': `max-age=604800` } },
   },
   site: {
     url: '',
   },
   pages: true,
-  hooks: {
-    'build:before': async () => {
-      if (process.env.FETCH_REMOTE_CONFIG === '1') {
-        const response = await fetchConfiguration();
-        generateScssVariables();
-        await fetchFavicon(response);
-        await fetchLogo(response);
-      } else {
-        console.warn(`Fetching PWA settings is disabled! Set FETCH_REMOTE_CONFIG in .env file.`);
-      }
-    },
-  },
   runtimeConfig: {
     public: {
       domain: validateApiUrl(process.env.API_URL) ?? process.env.API_ENDPOINT,
       apiEndpoint: process.env.API_ENDPOINT,
       cookieGroups: cookieConfig,
-      showNetPrices: true,
-      turnstileSiteKey: process.env?.CLOUDFLARE_TURNSTILE_SITE_KEY ?? '',
-      newsletterFromShowNames: process.env?.NEWSLETTER_FORM_SHOW_NAMES === '1' ?? false,
-      useAvif: process.env?.USE_AVIF === '1' ?? false,
-      useWebp: process.env?.USE_WEBP === '1' ?? false,
-      validateReturnReasons: process.env.VALIDATE_RETURN_REASONS === '1' ?? false,
-      enableQuickCheckoutTimer: process.env.ENABLE_QUICK_CHECKOUT_TIMER === '1' ?? false,
-      showConfigurationDrawer: process.env.SHOW_CONFIGURATION_DRAWER === '1' ?? false,
-      primaryColor: process.env.PRIMARY || '#0c7992',
-      secondaryColor: process.env.SECONDARY || '#008ebd',
+      turnstileSiteKey: process.env?.TURNSTILESITEKEY ?? '',
+      useAvif: process.env?.IMAGEAVIF === 'true',
+      useWebp: process.env?.IMAGEWEBP === 'true',
+      validateReturnReasons: process.env.VALIDATE_RETURN_REASONS === '1',
+      enableQuickCheckoutTimer: process.env.ENABLE_QUICK_CHECKOUT_TIMER === '1',
+      showConfigurationDrawer: process.env.SHOW_CONFIGURATION_DRAWER === '1',
+      defaultItemsPerPage: Number(process.env.DEFAULT_FEEDBACK_ITEMS_PER_PAGE ?? 10),
+      headerLogo: process.env.LOGO || '/images/logo.svg',
+      homepageCategoryId: Number(process.env.HOMEPAGE) ?? null,
+      shippingTextCategoryId: Number(process.env.SHIPPINGTEXT) ?? null,
+      storename: process.env.STORENAME || 'PLENTYSYSTEMS AG',
+      noCache: process.env.NO_CACHE || '',
+      configId: process.env.CONFIG_ID || '',
+      isHero: true,
+      font: 'Red Hat Text',
+      blockSize: 'm',
+      primaryColor: '#062633',
+      secondaryColor: '#31687d',
+      experimentalBlockEditForm: process.env.ENABLE_BLOCK_EDIT === 'true' || false,
     },
   },
   modules: [
+    '@plentymarkets/shop-module-gtag',
+    '@plentymarkets/shop-core',
+    '@nuxt/eslint',
     '@nuxt/image',
     '@nuxt/test-utils/module',
     '@nuxtjs/google-fonts',
@@ -104,12 +101,7 @@ export default defineNuxtConfig({
       '2xs': 360,
     },
   },
-  googleFonts: {
-    families: {
-      'Red Hat Display': { wght: [400, 500, 700] },
-      'Red Hat Text': { wght: [300, 400, 500, 700] },
-    },
-  },
+  googleFonts: fontFamilyNuxtConfig,
   i18n: nuxtI18nOptions,
   sitemap: {
     autoLastmod: true,
@@ -143,20 +135,24 @@ export default defineNuxtConfig({
   },
   tailwindcss: {
     configPath: '~/configuration/tailwind.config.ts',
+    exposeConfig: true,
   },
   turnstile: {
-    siteKey: process.env?.CLOUDFLARE_TURNSTILE_SITE_KEY,
+    siteKey: process.env?.TURNSTILESITEKEY,
   },
   viewport: {
     breakpoints: {
+      xs: 380,
       sm: 640,
-      md: 640,
+      md: 768,
       lg: 1024,
+      '4xl': 1920,
     },
     defaultBreakpoints: {
       mobile: 'sm',
       tablet: 'md',
       desktop: 'lg',
+      wideScreen: '4xl',
     },
     fallbackBreakpoint: 'lg',
     cookie: {
@@ -168,7 +164,7 @@ export default defineNuxtConfig({
     },
   },
   veeValidate: {
-    autoImports: true,
+    autoImports: false,
     componentNames: {
       Form: 'VeeForm',
       Field: 'VeeField',
@@ -191,7 +187,6 @@ export default defineNuxtConfig({
       navigationPreload: true,
       runtimeCaching: [
         {
-          // @ts-ignore
           urlPattern: ({ request }) => request.mode === 'navigate',
           handler: 'NetworkOnly',
           options: {
@@ -226,6 +221,7 @@ export default defineNuxtConfig({
         },
       ],
     },
+
     registerWebManifestInRouteRules: true,
   },
 });

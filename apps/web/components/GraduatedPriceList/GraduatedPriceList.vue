@@ -1,8 +1,8 @@
 <template>
-  <div class="typography-text-sm font-bold" v-if="graduatedList.length > 0">
+  <div v-if="graduatedList.length > 0" class="typography-text-sm font-bold mt-5">
     {{ $t('graduatedPrices.title') }}
   </div>
-  <table class="w-full text-left typography-text-sm mb-2" v-if="graduatedList.length > 0">
+  <table v-if="graduatedList.length > 0" class="w-full text-left typography-text-sm mb-2">
     <thead class="border-b-2 border-neutral-200">
       <tr>
         <th class="lg:py-4 py-2 lg:pr-4 pr-2 font-medium">{{ $t('graduatedPrices.price') }}</th>
@@ -36,9 +36,7 @@ import { productGetters } from '@plentymarkets/shop-api';
 import type { GraduatedPriceListProps } from '~/components/GraduatedPriceList/types';
 import { SfIconCheck } from '@storefront-ui/vue';
 
-const props = withDefaults(defineProps<GraduatedPriceListProps>(), {
-  count: 0,
-});
-const graduatedList = computed(() => productGetters.getGraduatedList(props.product));
-const selectedList = computed(() => productGetters.getGraduatedPriceByQuantity(props.product, props.count));
+const { product, count = 0 } = defineProps<GraduatedPriceListProps>();
+const graduatedList = computed(() => productGetters.getGraduatedList(product));
+const selectedList = computed(() => productGetters.getGraduatedPriceByQuantity(product, count));
 </script>

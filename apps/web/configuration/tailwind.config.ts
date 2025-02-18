@@ -2,15 +2,41 @@ import sfTypography from '@storefront-ui/typography';
 import { tailwindConfig } from '@storefront-ui/vue/tailwind-config';
 import type { Config } from 'tailwindcss';
 import defaultTheme from 'tailwindcss/defaultTheme';
+import { fontFamilyText } from './fontFamily.config';
 
 export default {
   presets: [tailwindConfig],
   content: ['./**/*.vue', '../../node_modules/@storefront-ui/vue/**/*.{js,mjs}'],
   theme: {
     extend: {
+      sfTypography: () => ({
+        'display-1': {
+          fontFamily: 'inherit',
+        },
+        'display-2': {
+          fontFamily: 'inherit',
+        },
+        'headline-1': {
+          fontFamily: 'inherit',
+        },
+        'headline-2': {
+          fontFamily: 'inherit',
+        },
+        'headline-3': {
+          fontFamily: 'inherit',
+        },
+        'headline-4': {
+          fontFamily: 'inherit',
+        },
+        'headline-5': {
+          fontFamily: 'inherit',
+        },
+        'headline-6': {
+          fontFamily: 'inherit',
+        },
+      }),
       fontFamily: {
-        display: ['"Red Hat Display"', ...defaultTheme.fontFamily.sans],
-        body: ['"Red Hat Text"', ...defaultTheme.fontFamily.sans],
+        body: [`${fontFamilyText}`, ...defaultTheme.fontFamily.sans],
       },
       colors: {
         primary: {
@@ -39,6 +65,10 @@ export default {
           '900': 'rgb(var(--colors-2-secondary-900) / <alpha-value>)',
           '950': 'rgb(var(--colors-2-secondary-950) / <alpha-value>)',
         },
+        editor: {
+          'body-bg': '#F1F3F5',
+          button: '#062633',
+        },
       },
       gridTemplateAreas: {
         'product-page': ['left-top right', 'left-bottom right'],
@@ -60,7 +90,17 @@ export default {
         xs: '376px',
         '2xs': '360px',
       },
+      width: {
+        '128': '32rem',
+      },
+      spacing: {
+        s: '1.875rem',
+        m: '2.5rem',
+        l: '3.125rem',
+        xl: '3.75rem',
+      },
     },
   },
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   plugins: [sfTypography, require('@savvywombat/tailwindcss-grid-areas')],
 } as Config;

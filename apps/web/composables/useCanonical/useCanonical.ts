@@ -1,7 +1,7 @@
-import type { UseCanonicalReturn } from './types';
-import type { StaticPageMeta, CategoriesPageMeta, UseCanonicalState } from './types';
-import type { Facet } from '@plentymarkets/shop-api';
-import type { FacetSearchCriteria } from '@plentymarkets/shop-api';
+import type { UseCanonicalReturn, StaticPageMeta, CategoriesPageMeta, UseCanonicalState } from './types';
+import type { Facet, FacetSearchCriteria } from '@plentymarkets/shop-api';
+import type { LocaleObject } from '@nuxtjs/i18n';
+
 /**
  * @description Composable managing canonical data
  * @returns UseCanonicalReturn
@@ -62,12 +62,12 @@ export const useCanonical: UseCanonicalReturn = () => {
   const setStaticPageMeta: StaticPageMeta = () => {
     state.value.loading = true;
 
-    const route = useRoute();
+    const route = useNuxtApp().$router.currentRoute.value;
     const runtimeConfig = useRuntimeConfig();
     const localePath = useLocalePath();
     const { locales, defaultLocale } = useI18n();
 
-    const alternateLocales = locales.value.map((item: any) => {
+    const alternateLocales = locales.value.map((item: LocaleObject) => {
       return {
         rel: 'alternate',
         hreflang: item.code,
@@ -100,12 +100,12 @@ export const useCanonical: UseCanonicalReturn = () => {
    */
   const setCategoriesPageMeta: CategoriesPageMeta = (productsCatalog: Facet, facetsFromUrl: FacetSearchCriteria) => {
     state.value.loading = true;
-    const route = useRoute();
+    const { $i18n, $router } = useNuxtApp();
+    const route = $router.currentRoute.value;
     const localePath = useLocalePath();
-    const { locale } = useI18n();
     const runtimeConfig = useRuntimeConfig();
 
-    const canonicalLink = `${runtimeConfig.public.domain}${localePath(route.fullPath, locale.value)}`;
+    const canonicalLink = `${runtimeConfig.public.domain}${localePath(route.fullPath, $i18n.locale.value)}`;
     useHead({
       link: [
         {
@@ -123,7 +123,7 @@ export const useCanonical: UseCanonicalReturn = () => {
               hreflang: key,
               href:
                 key === `x-default`
-                  ? `${runtimeConfig.public.domain}${localePath(route.fullPath, locale.value)}`
+                  ? `${runtimeConfig.public.domain}${localePath(route.fullPath, $i18n.locale.value)}`
                   : `${runtimeConfig.public.domain}${localePath(route.fullPath, key)}`,
             },
           ],

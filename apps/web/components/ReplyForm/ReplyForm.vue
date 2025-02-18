@@ -1,30 +1,30 @@
 <template>
-  <form @submit.prevent="onSubmit" data-testid="review-answer-form" class="mt-8 lg:mr-16">
+  <form data-testid="review-answer-form" class="mt-8 lg:mr-16" @submit.prevent="onSubmit">
     <h3 class="font-bold typography-headline-4 mb-2">{{ t('review.createAnswerFormTitle') }}</h3>
 
     <UiFormLabel for="reply-author">{{ t('review.reviewAuthor') }}</UiFormLabel>
     <SfInput
-      v-model="authorName"
       v-bind="authorNameAttributes"
+      id="reply-author"
+      v-model="authorName"
       :invalid="Boolean(errors['authorName'])"
       name="authorName"
-      id="reply-author"
       size="sm"
       class="font-normal text-sm"
     />
-    <VeeErrorMessage as="div" name="authorName" class="text-negative-700 text-sm" />
+    <ErrorMessage as="div" name="authorName" class="text-negative-700 text-sm" />
 
     <UiFormLabel for="reply-msg" class="mt-4">{{ t('review.yourAnswer') }} *</UiFormLabel>
     <SfTextarea
-      v-model="message"
       v-bind="messageAttributes"
-      :invalid="Boolean(errors['message'])"
       id="reply-msg"
+      v-model="message"
+      :invalid="Boolean(errors['message'])"
       name="message"
       size="lg"
       class="w-full"
     />
-    <VeeErrorMessage as="div" name="message" class="text-negative-700 text-sm mt-1" />
+    <ErrorMessage as="div" name="message" class="text-negative-700 text-sm mt-1" />
     <div v-if="!answerIsAboveLimit" class="text-xs text-neutral-500 text-right">{{ answerCharsCount }}</div>
 
     <p class="text-sm text-neutral-500 mb-2">* {{ t('contact.form.asterixHint') }}</p>
@@ -43,7 +43,8 @@
 <script setup lang="ts">
 import { SfInput, SfTextarea } from '@storefront-ui/vue';
 import { object, string } from 'yup';
-import { useForm } from 'vee-validate';
+import { useForm, ErrorMessage } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/yup';
 import { defaults } from '~/composables';
 import { reviewGetters, productGetters } from '@plentymarkets/shop-api';
 import type { ReplyFormProps } from '~/components/ReplyForm/types';

@@ -1,12 +1,16 @@
 <template>
   <div data-testid="contact-information" class="md:px-4 py-6">
     <div class="flex justify-between items-center">
-      <h2 class="text-neutral-900 text-lg font-bold mb-4">{{ $t('contactInfo.heading') }}</h2>
-      <UiButton v-if="!disabled && cart.customerEmail && !isAuthorized" size="sm" variant="tertiary" @click="open">
-        {{ $t('contactInfo.edit') }}
+      <h2 class="text-neutral-900 text-lg font-bold">{{ $t('contactInfo.heading') }}</h2>
+      <UiButton v-if="!disabled && cart.customerEmail && !isAuthorized" variant="secondary" @click="open">
+        <SfIconBase v-if="isMobile" viewBox="0 0 34 40" class="w-6 h-6 pt-[3px]">
+          <path :d="penPath" />
+        </SfIconBase>
+        <template v-else>{{ $t('contactInfo.edit') }}</template>
       </UiButton>
     </div>
-    <p v-if="cart.customerEmail" class="mt-2 md:w-[520px]">{{ cart.customerEmail }}</p>
+
+    <p v-if="cart.customerEmail" class="mt-4 md:w-[520px]">{{ cart.customerEmail }}</p>
     <div v-else class="w-full md:max-w-[520px]">
       <p>{{ $t('contactInfo.description') }}</p>
       <UiButton v-if="!disabled" class="mt-4 w-full md:w-auto" variant="secondary" @click="open">
@@ -38,14 +42,18 @@
 </template>
 
 <script lang="ts" setup>
-import { SfIconClose, useDisclosure } from '@storefront-ui/vue';
-import type { ContactInformationProps } from '~/components/ContactInformation/types';
+import { SfIconBase, SfIconClose, useDisclosure } from '@storefront-ui/vue';
+import type { ContactInformationProps } from './types';
+import { penPath } from '~/assets/icons/paths/pen';
 
-const { disabled } = withDefaults(defineProps<ContactInformationProps>(), { disabled: false });
+const { disabled = false } = defineProps<ContactInformationProps>();
 
-const { data, loginAsGuest, getSession, isAuthorized } = useCustomer();
+const viewport = useViewport();
+const { data: sessionData, loginAsGuest, getSession, isAuthorized } = useCustomer();
 const { isOpen, open, close } = useDisclosure();
-const cart = ref({ customerEmail: data.value?.user?.email ?? data.value?.user?.guestMail ?? '' });
+const cart = ref({ customerEmail: sessionData.value?.user?.email ?? sessionData.value?.user?.guestMail ?? '' });
+const isMobile = computed(() => viewport.isLessThan('md'));
+
 const saveContactInformation = async (email: string) => {
   cart.value.customerEmail = email;
   await loginAsGuest(email);
@@ -54,16 +62,11 @@ const saveContactInformation = async (email: string) => {
 };
 
 watch(
-  () => data.value?.user,
+  () => sessionData.value?.user,
   (userData) => {
     cart.value.customerEmail = userData?.email ?? userData?.guestMail ?? '';
+    cart.value.customerEmail ? close() : open();
   },
-  { immediate: true },
-);
-
-watch(
-  () => cart.value.customerEmail,
-  (cartCustomerEmail) => (cartCustomerEmail ? close() : open()),
   { immediate: true },
 );
 </script>

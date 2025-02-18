@@ -9,7 +9,7 @@
           {{ t('review.editReplyFormTitle') }}
         </template>
       </h3>
-      <UiButton @click="closeReviewModal" square variant="tertiary" class="absolute right-2 top-2">
+      <UiButton square variant="tertiary" class="absolute right-2 top-2" @click="closeReviewModal">
         <SfIconClose />
       </UiButton>
     </header>
@@ -29,30 +29,31 @@
               class="p-1 gap-x-2"
             />
           </div>
-          <VeeErrorMessage as="div" name="ratingValue" class="text-negative-700 text-sm -mt-3 mb-2" />
+          <ErrorMessage as="div" name="ratingValue" class="text-negative-700 text-sm -mt-3 mb-2" />
         </div>
 
         <template v-if="isCreateReviewModal || isUpdateReviewModal">
-          <UiFormLabel for="review-title">{{ t('review.title') }} *</UiFormLabel>
+          <UiFormLabel class="mt-2" for="review-title">{{ t('review.title') }} *</UiFormLabel>
           <SfInput
-            v-model="title"
             v-bind="titleAttributes"
+            id="review-title"
+            v-model="title"
             :invalid="Boolean(errors['title'])"
             name="title"
-            id="review-title"
           />
-          <VeeErrorMessage as="div" name="title" class="text-negative-700 text-sm mt-1" />
+          <ErrorMessage as="div" name="title" class="text-negative-700 text-sm mt-1" />
         </template>
 
-        <UiFormLabel for="review-author">{{ t('review.reviewAuthor') }}</UiFormLabel>
+        <UiFormLabel class="mt-4" for="review-author">{{ t('review.reviewAuthor') }}</UiFormLabel>
         <SfInput
-          v-model="authorName"
           v-bind="authorNameAttributes"
+          id="review-author"
+          v-model="authorName"
           :invalid="Boolean(errors['authorName'])"
           name="authorName"
-          id="review-author"
+          data-testid="input-authorName"
         />
-        <VeeErrorMessage as="div" name="authorName" class="text-negative-700 text-sm" />
+        <ErrorMessage as="div" name="authorName" class="text-negative-700 text-sm" />
 
         <UiFormLabel for="review-message" class="mt-4">
           <template v-if="isReplyUpdateModal">
@@ -70,15 +71,15 @@
           :invalid="Boolean(errors['message'])"
           size="lg"
           name="message"
-          class="w-full"
+          class="w-full max-h-80 min-h-16"
         />
-        <VeeErrorMessage as="div" name="message" class="text-negative-700 text-sm mt-1" />
+        <ErrorMessage as="div" name="message" class="text-negative-700 text-sm mt-1" />
         <div v-if="!reviewIsAboveLimit" class="text-xs text-neutral-500 text-right">{{ reviewCharsCount }}</div>
 
         <p class="text-sm text-neutral-500 mt-4 mb-2">* {{ t('contact.form.asterixHint') }}</p>
 
-        <div class="flex justify-end gap-x-4">
-          <UiButton @click="closeReviewModal" type="button" variant="secondary" class="flex-1 md:flex-initial">
+        <div class="flex justify-end gap-x-4 mt-6">
+          <UiButton type="button" variant="secondary" class="flex-1 md:flex-initial" @click="closeReviewModal">
             {{ t('review.cancel') }}
           </UiButton>
           <UiButton type="submit" class="flex-1 md:flex-initial">
@@ -93,14 +94,14 @@
 <script lang="ts" setup>
 import { SfRatingButton, SfTextarea, SfInput, SfIconClose, useId } from '@storefront-ui/vue';
 import { object, string, number } from 'yup';
-import { useForm } from 'vee-validate';
+import { useForm, ErrorMessage } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/yup';
 import type { ReviewFormProps } from './types';
 import { productGetters, reviewGetters } from '@plentymarkets/shop-api';
 import type { ReviewItem } from '@plentymarkets/shop-api';
 import { defaults } from '~/composables';
 
-const props = withDefaults(defineProps<ReviewFormProps>(), { reviewItem: null });
-const { reviewItem } = toRefs(props);
+const { reviewItem = null } = defineProps<ReviewFormProps>();
 const { t } = useI18n();
 const { currentProduct } = useProducts();
 const { createProductReview, setProductReview, closeReviewModal, modalType } = useProductReviews(
@@ -118,17 +119,17 @@ const validationSchema = toTypedSchema(
     ratingValue: number()
       .required(t('review.validation.ratingRequired'))
       .min(1, t('review.validation.ratingRequired'))
-      .default(reviewGetters.getReviewRating(reviewItem.value ?? ({} as ReviewItem))),
+      .default(reviewGetters.getReviewRating(reviewItem ?? ({} as ReviewItem))),
     title: string()
       .required(t('review.validation.titleRequired'))
-      .default(reviewGetters.getReviewTitle(reviewItem.value ?? ({} as ReviewItem))),
+      .default(reviewGetters.getReviewTitle(reviewItem ?? ({} as ReviewItem))),
     message: string()
       .optional()
       .max(reviewCharacterLimit, t('review.validation.textareaMaxLength'))
-      .default(reviewGetters.getReviewMessage(reviewItem.value ?? ({} as ReviewItem))),
+      .default(reviewGetters.getReviewMessage(reviewItem ?? ({} as ReviewItem))),
     authorName: string()
       .optional()
-      .default(reviewGetters.getReviewAuthor(reviewItem.value ?? ({} as ReviewItem))),
+      .default(reviewGetters.getReviewAuthor(reviewItem ?? ({} as ReviewItem))),
   }),
 );
 
@@ -139,10 +140,10 @@ const validationSchemaReply = toTypedSchema(
     message: string()
       .required()
       .max(reviewCharacterLimit, t('review.validation.textareaMaxLength'))
-      .default(reviewGetters.getReviewMessage(reviewItem.value ?? ({} as ReviewItem))),
+      .default(reviewGetters.getReviewMessage(reviewItem ?? ({} as ReviewItem))),
     authorName: string()
       .optional()
-      .default(reviewGetters.getReviewAuthor(reviewItem.value ?? ({} as ReviewItem))),
+      .default(reviewGetters.getReviewAuthor(reviewItem ?? ({} as ReviewItem))),
   }),
 );
 
@@ -169,10 +170,10 @@ const sendReview = async () => {
     title: title.value || '',
     message: message.value,
     authorName: authorName.value,
-    feedbackId: Number(reviewGetters.getReviewId(reviewItem.value ?? ({} as ReviewItem))),
+    feedbackId: Number(reviewGetters.getReviewId(reviewItem ?? ({} as ReviewItem))),
   };
 
-  if (reviewItem.value) {
+  if (reviewItem) {
     setProductReview(params);
   } else {
     createProductReview(params);

@@ -6,30 +6,30 @@
       </h1>
       <p class="mb-10">{{ t('contact.contactShopMessage') }}</p>
 
-      <form data-testid="contact-form" class="flex flex-col rounded-md gap-4" @submit.prevent="onSubmit" novalidate>
+      <form data-testid="contact-form" class="flex flex-col rounded-md gap-4" novalidate @submit.prevent="onSubmit">
         <div class="">
           <label>
             <UiFormLabel class="mb-1">{{ t('contact.form.nameLabel') }} {{ t('form.required') }}</UiFormLabel>
             <SfInput
               v-bind="nameAttributes"
+              v-model="name"
               name="name"
               type="text"
-              v-model="name"
               :invalid="Boolean(errors['name'])"
             />
           </label>
-          <VeeErrorMessage as="div" name="name" class="text-negative-700 text-left text-sm pt-[0.2rem]" />
+          <ErrorMessage as="div" name="name" class="text-negative-700 text-left text-sm pt-[0.2rem]" />
         </div>
         <div class="">
           <label>
             <UiFormLabel class="mb-1">{{ t('contact.form.emailLabel') }} {{ t('form.required') }}</UiFormLabel>
 
             <SfInput
+              v-bind="emailAttributes"
+              v-model="email"
               name="email"
               type="email"
               autocomplete="email"
-              v-bind="emailAttributes"
-              v-model="email"
               :invalid="Boolean(errors['email'])"
             >
               <template #prefix>
@@ -37,41 +37,41 @@
               </template>
             </SfInput>
           </label>
-          <VeeErrorMessage as="div" name="email" class="text-negative-700 text-left text-sm pt-[0.2rem]" />
+          <ErrorMessage as="div" name="email" class="text-negative-700 text-left text-sm pt-[0.2rem]" />
         </div>
         <label>
           <UiFormLabel class="mb-1">{{ t('contact.form.subjectLabel') }} {{ t('form.required') }}</UiFormLabel>
-          <SfInput name="subject" type="text" v-model="subject" v-bind="subjectAttributes" />
-          <VeeErrorMessage as="div" name="subject" class="text-negative-700 text-left text-sm pt-[0.2rem]" />
+          <SfInput v-model="subject" name="subject" type="text" v-bind="subjectAttributes" />
+          <ErrorMessage as="div" name="subject" class="text-negative-700 text-left text-sm pt-[0.2rem]" />
         </label>
         <label>
           <UiFormLabel class="mb-1">{{ t('contact.form.order-id') }} {{ t('form.required') }}</UiFormLabel>
-          <SfInput name="order-id" type="text" v-model="orderId" v-bind="orderIdAttributes" />
-          <VeeErrorMessage as="div" name="orderId" class="text-negative-700 text-left text-sm pt-[0.2rem]" />
+          <SfInput v-model="orderId" name="order-id" type="text" v-bind="orderIdAttributes" />
+          <ErrorMessage as="div" name="orderId" class="text-negative-700 text-left text-sm pt-[0.2rem]" />
         </label>
 
         <div>
           <label class="flex flex-col">
             <UiFormLabel class="mb-1">{{ t('contact.form.message') }} {{ t('form.required') }}</UiFormLabel>
             <SfTextarea
+              v-bind="messageAttributes"
+              v-model="message"
               :placeholder="t('contact.form.message-placeholder')"
               class="w-full"
               name="message"
-              v-bind="messageAttributes"
-              v-model="message"
               :invalid="Boolean(errors['message'])"
               required
             />
           </label>
-          <VeeErrorMessage as="div" name="message" class="text-negative-700 text-left text-sm pt-[0.2rem]" />
+          <ErrorMessage as="div" name="message" class="text-negative-700 text-left text-sm pt-[0.2rem]" />
         </div>
 
         <div>
           <div class="flex items-center">
             <SfCheckbox
-              :invalid="Boolean(errors['privacyPolicy'])"
               id="terms"
               v-model="privacyPolicy"
+              :invalid="Boolean(errors['privacyPolicy'])"
               v-bind="privacyPolicyAttributes"
               value="value"
               class="peer"
@@ -95,7 +95,7 @@
               {{ t('form.required') }}
             </label>
           </div>
-          <VeeErrorMessage as="div" name="privacyPolicy" class="text-negative-700 text-left text-sm pt-[0.2rem]" />
+          <ErrorMessage as="div" name="privacyPolicy" class="text-negative-700 text-left text-sm pt-[0.2rem]" />
         </div>
 
         <p class="text-sm text-neutral-500 mb-2">{{ t('form.required') }} {{ t('contact.form.asterixHint') }}</p>
@@ -115,13 +115,13 @@
         <div>
           <NuxtTurnstile
             v-if="turnstileSiteKey"
-            v-model="turnstile"
             v-bind="turnstileAttributes"
             ref="turnstileElement"
+            v-model="turnstile"
             :options="{ theme: 'light' }"
             class="mt-4"
           />
-          <VeeErrorMessage as="div" name="turnstile" class="text-negative-700 text-left text-sm pt-[0.2rem]" />
+          <ErrorMessage as="div" name="turnstile" class="text-negative-700 text-left text-sm pt-[0.2rem]" />
         </div>
       </form>
     </div>
@@ -131,7 +131,8 @@
 <script setup lang="ts">
 import { SfInput, SfCheckbox, SfLink, SfTextarea, SfLoaderCircular, SfIconEmail } from '@storefront-ui/vue';
 import { boolean, object, string } from 'yup';
-import { useForm } from 'vee-validate';
+import { useForm, ErrorMessage } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/yup';
 import { paths } from '~/utils/paths';
 
 definePageMeta({
@@ -146,6 +147,7 @@ const localePath = useLocalePath();
 const turnstileSiteKey = runtimeConfig.public?.turnstileSiteKey ?? '';
 const turnstileElement = ref();
 const { send } = useNotification();
+const { getRobots, setRobotForStaticPage } = useRobots();
 
 const validationSchema = toTypedSchema(
   object({
@@ -214,4 +216,7 @@ const sendContact = async () => {
 };
 
 const onSubmit = handleSubmit(() => sendContact());
+
+await getRobots();
+setRobotForStaticPage('ContactPage');
 </script>

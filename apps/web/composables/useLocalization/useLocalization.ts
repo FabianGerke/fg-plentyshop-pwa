@@ -3,6 +3,18 @@ import type { CategoryTreeItem } from '@plentymarkets/shop-api';
 import { categoryTreeGetters } from '@plentymarkets/shop-api';
 import { useDisclosure } from '@storefront-ui/vue';
 
+const setVsfLocale = (locale: string) => {
+  const { $i18n } = useNuxtApp();
+  const { setLocaleCookie } = $i18n;
+  const DAYS = 100;
+  const localeExpireDate = new Date();
+  localeExpireDate.setDate(new Date().getDate() + DAYS);
+  const vsfLocale = useCookie('vsf-locale', { expires: localeExpireDate });
+
+  setLocaleCookie(locale);
+  vsfLocale.value = locale;
+};
+
 export const useLocalization = createSharedComposable(() => {
   const { isOpen: isOpen, toggle } = useDisclosure();
   /**
@@ -12,7 +24,6 @@ export const useLocalization = createSharedComposable(() => {
    * @returns category path that is then navigated to
    * @example buildCategoryLanguagePath('')
    */
-  // eslint-disable-next-line unicorn/consistent-function-scoping
   const buildCategoryLanguagePath = (path: string) => {
     const localePath = useLocalePath();
 
@@ -26,7 +37,6 @@ export const useLocalization = createSharedComposable(() => {
    * @returns product path that is then navigated to
    * @example buildProductLanguagePath('')
    */
-  // eslint-disable-next-line sonarjs/no-identical-functions,unicorn/consistent-function-scoping
   const buildProductLanguagePath = (path: string) => {
     const localePath = useLocalePath();
 
@@ -41,7 +51,6 @@ export const useLocalization = createSharedComposable(() => {
    * @returns product path that is then navigated to
    * @example buildCategoryMenuLink(category, categoryTree)
    */
-  // eslint-disable-next-line unicorn/consistent-function-scoping
   const buildCategoryMenuLink = (category: CategoryTreeItem, categoryTree: CategoryTreeItem[]) => {
     return categoryTreeGetters.generateCategoryLink(categoryTree, category, '');
   };
@@ -52,7 +61,6 @@ export const useLocalization = createSharedComposable(() => {
    * @param path
    * @example getCategoryUrlFromRoute('')
    */
-  // eslint-disable-next-line unicorn/consistent-function-scoping
   const getCategoryUrlFromRoute = (path: string): string => {
     const parts = path.split('/');
 
@@ -89,17 +97,18 @@ export const useLocalization = createSharedComposable(() => {
    * @description Function for switching app locale.
    * @param language
    *
+   * @param hideMenu
    * @example switchLocale('en')
    */
-  const switchLocale = async (language: string) => {
-    const { $i18n } = useNuxtApp();
+  const switchLocale = async (language: string, hideMenu = true) => {
     const { getCart } = useCart();
-    const { setLocaleCookie } = $i18n;
-
     const switchLocalePath = useSwitchLocalePath();
     const route = useRoute();
-    setLocaleCookie(language);
-    toggle();
+
+    setVsfLocale(language);
+    if (hideMenu) {
+      toggle();
+    }
     await getCart().then(
       async () =>
         await navigateTo({
@@ -117,5 +126,6 @@ export const useLocalization = createSharedComposable(() => {
     isOpen,
     toggle,
     switchLocale,
+    setVsfLocale,
   };
 });

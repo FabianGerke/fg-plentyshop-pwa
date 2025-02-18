@@ -1,19 +1,25 @@
 <template>
   <UiModal
-    @mousemove="endTimer()"
     v-if="isOpen"
     v-model="isOpen"
     tag="section"
     class="h-full md:h-fit m-0 p-0 lg:w-[1000px] overflow-y-auto"
-    aria-labelledby="quick-checkout-modal"
+    aria-label="quick-checkout-modal"
+    @mousemove="endTimer()"
   >
     <header>
-      <h2 class="font-bold font-headings text-lg leading-6 md:text-2xl">
+      <h2 class="font-bold text-lg leading-6 md:text-2xl">
         <span>{{ t('quickCheckout.heading') }}</span>
       </h2>
       <div class="absolute right-2 top-2 flex items-center">
         <span v-if="hasTimer" class="mr-2 text-gray-400">{{ timer }}s</span>
-        <UiButton data-testid="quick-checkout-close" square variant="tertiary" @click="close">
+        <UiButton
+          :aria-label="$t('closeDialog')"
+          data-testid="quick-checkout-close"
+          square
+          variant="tertiary"
+          @click="close"
+        >
           <SfIconClose />
         </UiButton>
       </div>
@@ -22,26 +28,27 @@
     <div class="lg:grid lg:grid-cols-2 lg:gap-4">
       <div class="lg:border-r-2 flex flex-col items-center p-8">
         <NuxtImg
-          :src="addModernImageExtension(productGetters.getPreviewImage(product))"
+          :src="addModernImageExtension(productGetters.getMiddleImage(product))"
           :alt="t('imageOfSth', { name: productGetters.getName(product) })"
           width="240"
           height="240"
           loading="lazy"
           class="mb-3"
         />
-
-        <div class="flex mb-3">
-          <div class="mr-1 flex">
-            <span class="self-center"> {{ quantity }}x </span>
-          </div>
+        <div class="flex mb-1">
           <h1 class="font-bold typography-headline-4" data-testid="product-name">
             {{ productGetters.getName(product) }}
           </h1>
         </div>
+        <div class="mb-3">
+          <span class="self-center text-gray-600 sm:typography-headline-4 typography-headline-3">
+            {{ t('account.ordersAndReturns.orderDetails.quantity') }}: {{ quantity }}
+          </span>
+        </div>
 
         <ProductPrice :product="product" />
 
-        <div class="mb-4 font-normal typography-text-sm whitespace-pre" data-testid="product-description">
+        <div class="mb-4 font-normal typography-text-sm" data-testid="product-description">
           {{ productGetters.getShortDescription(product) }}
         </div>
 
@@ -49,10 +56,20 @@
           <span>{{ t('asterisk') }}</span>
           <span v-if="showNetPrices">{{ t('itemExclVAT') }}</span>
           <span v-else>{{ t('itemInclVAT') }}</span>
-          <span>{{ t('excludedShipping') }}</span>
+          <i18n-t keypath="excludedShipping" scope="global">
+            <template #shipping>
+              <SfLink
+                :href="localePath(paths.shipping)"
+                target="_blank"
+                class="focus:outline focus:outline-offset-2 focus:outline-2 outline-secondary-600 rounded"
+              >
+                {{ $t('delivery') }}
+              </SfLink>
+            </template>
+          </i18n-t>
         </div>
 
-        <VariationProperties :product="product" />
+        <VariationProperties :product="lastUpdatedProduct" />
       </div>
       <div class="py-8 px-10">
         <div class="mb-8">
@@ -65,34 +82,34 @@
 
         <UiButton
           data-testid="quick-checkout-cart-button"
-          @click="goToPage(paths.cart)"
           size="lg"
           class="w-full mb-3"
           variant="secondary"
+          @click="goToPage(paths.cart)"
         >
-          {{ $t('quickCheckout.checkYourCart') }}
+          {{ t('quickCheckout.checkYourCart') }}
         </UiButton>
 
         <UiButton
           data-testid="quick-checkout-checkout-button"
-          @click="goToPage(paths.checkout)"
           size="lg"
           class="w-full mb-4 md:mb-0"
+          @click="goToPage(paths.checkout)"
         >
-          {{ $t('goToCheckout') }}
+          {{ t('goToCheckout') }}
         </UiButton>
-        <div v-if="isAvailable">
-          <OrDivider class="my-4" />
-          <PayPalExpressButton class="w-full text-center" type="CartPreview" />
-        </div>
+        <OrDivider v-if="isPaypalAvailable" class="my-4" />
+        <PayPalExpressButton class="w-full text-center" type="CartPreview" @on-approved="isOpen = false" />
+        <PayPalPayLaterBanner placement="payment" :amount="totals.total" />
       </div>
     </div>
   </UiModal>
 </template>
 
 <script setup lang="ts">
-import { SfIconClose } from '@storefront-ui/vue';
+import { SfIconClose, SfLink } from '@storefront-ui/vue';
 import type { QuickCheckoutProps } from './types';
+import type { Product } from '@plentymarkets/shop-api';
 import { cartGetters, productGetters } from '@plentymarkets/shop-api';
 import ProductPrice from '~/components/ProductPrice/ProductPrice.vue';
 import { paths } from '~/utils/paths';
@@ -100,11 +117,12 @@ import { paths } from '~/utils/paths';
 defineProps<QuickCheckoutProps>();
 
 const { t, n } = useI18n();
-const runtimeConfig = useRuntimeConfig();
-const showNetPrices = runtimeConfig.public.showNetPrices;
+
+const { showNetPrices } = useCustomer();
+
 const localePath = useLocalePath();
-const { data: cart } = useCart();
-const { isAvailable, loadConfig } = usePayPal();
+const { data: cart, lastUpdatedCartItem } = useCart();
+const { isAvailable: isPaypalAvailable, loadConfig } = usePayPal();
 const { addModernImageExtension } = useModernImage();
 const { isOpen, timer, startTimer, endTimer, closeQuickCheckout, hasTimer, quantity } = useQuickCheckout();
 const cartItemsCount = computed(() => cart.value?.items?.reduce((price, { quantity }) => price + quantity, 0) ?? 0);
@@ -114,6 +132,8 @@ onMounted(() => {
   loadConfig();
 });
 onUnmounted(() => endTimer());
+
+const lastUpdatedProduct = computed(() => cartGetters.getVariation(lastUpdatedCartItem.value) || ({} as Product));
 
 const totals = computed(() => {
   const totalsData = cartGetters.getTotals(cart.value);

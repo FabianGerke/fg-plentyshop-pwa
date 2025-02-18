@@ -1,5 +1,5 @@
 import type { Filters, GetFacetsFromURLResponse, UseCategoryFiltersResponse } from './types';
-
+import type { RouteLocationNormalizedGeneric } from 'vue-router';
 const nonFilters = new Set(['page', 'sort', 'term', 'facets', 'itemsPerPage', 'priceMin', 'priceMax']);
 
 const reduceFilters =
@@ -42,8 +42,8 @@ const mergeFilters = (oldFilters: Filters, filters: Filters): Filters => {
  * } = useCategoryFilter();
  * ```
  */
-export const useCategoryFilter = (): UseCategoryFiltersResponse => {
-  const route = useRoute();
+export const useCategoryFilter = (to?: RouteLocationNormalizedGeneric): UseCategoryFiltersResponse => {
+  const route = to ?? useNuxtApp().$router.currentRoute.value;
 
   /**
    * @description Function for getting facets from url.
@@ -55,6 +55,7 @@ export const useCategoryFilter = (): UseCategoryFiltersResponse => {
    */
   const getFacetsFromURL = (): GetFacetsFromURLResponse => {
     const { getCategoryUrlFromRoute } = useLocalization();
+    const config = useRuntimeConfig().public;
 
     return {
       categoryUrlPath: getCategoryUrlFromRoute(route.fullPath),
@@ -62,7 +63,7 @@ export const useCategoryFilter = (): UseCategoryFiltersResponse => {
       sort: route.query.sort?.toString(),
       facets: route.query.facets?.toString(),
       feedbackPage: Number(route.query.feedbackPage as string) || defaults.DEFAULT_FEEDBACK_PAGE,
-      feedbacksPerPage: Number(route.query.feedbacksPerPage as string) || defaults.DEFAULT_FEEDBACK_ITEMS_PER_PAGE,
+      feedbacksPerPage: Number(route.query.feedbacksPerPage as string) || config.defaultItemsPerPage,
       itemsPerPage: Number(route.query.itemsPerPage as string) || defaults.DEFAULT_ITEMS_PER_PAGE,
       term: route.query.term?.toString(),
       priceMin: route.query.priceMin?.toString(),

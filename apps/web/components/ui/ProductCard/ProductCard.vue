@@ -18,11 +18,12 @@
         <NuxtImg
           :src="imageUrl"
           :alt="imageAlt"
+          :title="imageTitle"
           :loading="lazy && !priority ? 'lazy' : 'eager'"
           :fetchpriority="priority ? 'high' : 'auto'"
           :preload="priority || false"
-          :width="imageWidth"
-          :height="imageHeight"
+          :width="getWidth()"
+          :height="getHeight()"
           class="object-contain rounded-md aspect-square w-full"
           data-testid="image-slot"
         />
@@ -61,14 +62,11 @@
           <span v-if="!productGetters.canBeAddedToCartFromCategoryPage(product)" class="mr-1">
             {{ t('account.ordersAndReturns.orderDetails.priceFrom') }}
           </span>
-          <span>{{ n(cheapestPrice ?? mainPrice, 'currency') }}</span>
-          <span v-if="showNetPrices">{{ t('asterisk') }} </span>
+          <span>{{ n(price, 'currency') }}</span>
+          <span>{{ t('asterisk') }} </span>
         </span>
-        <span
-          v-if="oldPrice && oldPrice !== mainPrice"
-          class="typography-text-sm text-neutral-500 line-through md:ml-3 md:pb-2"
-        >
-          {{ n(oldPrice, 'currency') }}
+        <span v-if="crossedPrice" class="typography-text-sm text-neutral-500 line-through md:ml-3 md:pb-2">
+          {{ n(crossedPrice, 'currency') }}
         </span>
       </div>
       <UiButton
@@ -76,10 +74,10 @@
         size="sm"
         class="min-w-[80px] w-fit"
         data-testid="add-to-basket-short"
-        @click="addWithLoader(Number(productGetters.getId(product)))"
         :disabled="loading"
+        @click="addWithLoader(Number(productGetters.getId(product)))"
       >
-        <template #prefix v-if="!loading">
+        <template v-if="!loading" #prefix>
           <SfIconShoppingCart size="sm" />
         </template>
         <SfLoaderCircular v-if="loading" class="flex justify-center items-center" size="sm" />
@@ -95,9 +93,10 @@
 </template>
 
 <script setup lang="ts">
-import { CategoryTreeItem, productGetters } from '@plentymarkets/shop-api';
+import { productGetters } from '@plentymarkets/shop-api';
 import { SfLink, SfIconShoppingCart, SfLoaderCircular, SfRating, SfCounter } from '@storefront-ui/vue';
 import type { ProductCardProps } from '~/components/ui/ProductCard/types';
+import { defaults } from '~/composables';
 
 const localePath = useLocalePath();
 const { t, n } = useI18n();
@@ -105,43 +104,46 @@ const {
   product,
   name,
   imageUrl,
-  imageAlt,
+  imageAlt = '',
+  imageTitle,
   imageWidth,
   imageHeight,
   rating,
   ratingCount,
   priority,
-  lazy,
+  lazy = true,
   unitContent,
   unitName,
   basePrice,
   showBasePrice,
-  isFromWishlist,
-  isFromSlider,
-} = withDefaults(defineProps<ProductCardProps>(), {
-  lazy: true,
-  imageAlt: '',
-  isFromWishlist: false,
-  isFromSlider: false,
-});
+  isFromWishlist = false,
+  isFromSlider = false,
+} = defineProps<ProductCardProps>();
 
 const { data: categoryTree } = useCategoryTree();
 const { openQuickCheckout } = useQuickCheckout();
 const { addToCart } = useCart();
+const { price, crossedPrice } = useProductPrice(product);
 const { send } = useNotification();
 const loading = ref(false);
-const runtimeConfig = useRuntimeConfig();
-const showNetPrices = runtimeConfig.public.showNetPrices;
-const productPath = ref('');
-const setProductPath = (categoriesTree: CategoryTreeItem[]) => {
-  const path = productGetters.getCategoryUrlPath(product, categoriesTree);
-  const productSlug = productGetters.getSlug(product) + `_${productGetters.getItemId(product)}`;
-  productPath.value = localePath(`${path}/${productSlug}`);
+
+const path = computed(() => productGetters.getCategoryUrlPath(product, categoryTree.value));
+const productSlug = computed(() => productGetters.getSlug(product) + `_${productGetters.getItemId(product)}`);
+const productPath = computed(() => localePath(`${path.value}/${productSlug.value}`));
+const getWidth = () => {
+  if (imageWidth && imageWidth > 0 && imageUrl.includes(defaults.IMAGE_LINK_SUFIX)) {
+    return imageWidth;
+  }
+  return '';
+};
+const getHeight = () => {
+  if (imageHeight && imageHeight > 0 && imageUrl.includes(defaults.IMAGE_LINK_SUFIX)) {
+    return imageHeight;
+  }
+  return '';
 };
 
-setProductPath(categoryTree.value);
-
-const addWithLoader = async (productId: number) => {
+const addWithLoader = async (productId: number, quickCheckout = true) => {
   loading.value = true;
 
   try {
@@ -149,30 +151,15 @@ const addWithLoader = async (productId: number) => {
       productId: productId,
       quantity: 1,
     });
-
-    openQuickCheckout(product, 1);
-    send({ message: t('addedToCart'), type: 'positive' });
+    if (quickCheckout) {
+      openQuickCheckout(product, 1);
+    } else {
+      send({ message: t('addedToCart'), type: 'positive' });
+    }
   } finally {
     loading.value = false;
   }
 };
 
-const mainPrice = computed(() => {
-  const price = productGetters.getPrice(product);
-  if (!price) return 0;
-
-  if (price.special) return price.special;
-  if (price.regular) return price.regular;
-
-  return 0;
-});
-
-const cheapestPrice = productGetters.getCheapestGraduatedPrice(product);
-const oldPrice = productGetters.getRegularPrice(product);
 const NuxtLink = resolveComponent('NuxtLink');
-
-watch(
-  () => categoryTree.value,
-  (categoriesTree) => setProductPath(categoriesTree),
-);
 </script>

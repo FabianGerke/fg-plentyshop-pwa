@@ -8,11 +8,11 @@
     </label>
     <SfSelect
       :id="'attribute-' + productAttributeGetters.getAttributeId(attribute)"
-      size="lg"
       v-model="value"
-      @update:model-value="(event) => doUpdateValue(Number(event))"
+      size="lg"
       :placeholder="t('pleaseSelect')"
       :invalid="Boolean(errors['selectedValue'])"
+      @update:model-value="(event) => doUpdateValue(Number(event))"
     >
       <option :value="undefined">{{ t('pleaseSelect') }}</option>
       <option
@@ -24,7 +24,7 @@
         {{ productAttributeGetters.getAttributeValueName(item) }}
       </option>
     </SfSelect>
-    <VeeErrorMessage as="span" name="selectedValue" class="flex text-negative-700 text-sm mt-2" />
+    <ErrorMessage as="span" name="selectedValue" class="flex text-negative-700 text-sm mt-2" />
   </div>
 </template>
 
@@ -33,7 +33,8 @@ import { SfSelect } from '@storefront-ui/vue';
 import type { AttributeSelectProps } from '../types';
 import { productAttributeGetters } from '@plentymarkets/shop-api';
 import { number, object } from 'yup';
-import { useForm } from 'vee-validate';
+import { useForm, ErrorMessage } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/yup';
 
 const { t } = useI18n();
 const { attribute } = defineProps<AttributeSelectProps>();

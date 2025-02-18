@@ -1,9 +1,9 @@
 <template>
-  <div class="font-medium ml-8" :class="{ 'text-center !ml-0': !isModal }">
+  <div class="font-medium ml-8" :class="{ 'flex flex-col items-center': !isModal }">
     <div class="text-lg">{{ t('auth.signup.heading') }}</div>
     <div class="text-base">{{ t('auth.signup.subheading') }}</div>
 
-    <div class="mt-5 font-normal flex flex-col gap-2" :class="{ 'items-center': !isModal }">
+    <div class="mt-5 font-normal flex flex-col gap-2">
       <div class="flex items-center gap-2">
         <SfIconPerson class="text-primary-500" />
         <div>{{ t('auth.signup.benefits.saveAddresses') }}</div>
@@ -23,7 +23,7 @@
     </div>
   </div>
   <div class="flex items-center justify-center my-1">
-    <form @submit.prevent="onSubmit" class="flex flex-col gap-4 p-2 md:p-6 rounded-md w-full md:w-[400px]">
+    <form class="flex flex-col gap-4 p-2 md:p-6 rounded-md w-full md:w-[400px]" @submit.prevent="onSubmit">
       <label>
         <UiFormLabel>{{ t('form.emailLabel') }} {{ t('form.required') }}</UiFormLabel>
         <SfInput
@@ -34,32 +34,32 @@
           type="email"
           autocomplete="email"
         />
-        <VeeErrorMessage as="span" name="register.email" class="flex text-negative-700 text-sm mt-2" />
+        <ErrorMessage as="span" name="register.email" class="flex text-negative-700 text-sm mt-2" />
       </label>
 
       <label>
         <UiFormLabel>{{ t('form.passwordLabel') }} {{ t('form.required') }}</UiFormLabel>
         <UiFormPasswordInput
+          v-model="password"
           :title="t('invalidPassword')"
           name="password"
           autocomplete="current-password"
-          v-model="password"
           v-bind="passwordAttributes"
           :invalid="Boolean(errors['register.password'])"
         />
-        <!-- <VeeErrorMessage as="span" name="register.password" class="flex text-negative-700 text-sm mt-2" /> -->
+        <!-- <ErrorMessage as="span" name="register.password" class="flex text-negative-700 text-sm mt-2" /> -->
       </label>
       <label>
         <UiFormLabel>{{ t('form.repeatPasswordLabel') }}</UiFormLabel>
         <UiFormPasswordInput
+          v-model="repeatPassword"
           :title="t('invalidPassword')"
           name="password"
           autocomplete="current-password"
-          v-model="repeatPassword"
           v-bind="repeatPasswordAttributes"
           :invalid="Boolean(errors['register.repeatPassword'])"
         />
-        <VeeErrorMessage as="span" name="register.repeatPassword" class="flex text-negative-700 text-sm mt-2" />
+        <ErrorMessage as="span" name="register.repeatPassword" class="flex text-negative-700 text-sm mt-2" />
       </label>
 
       <div class="text-xs">
@@ -106,18 +106,18 @@
           {{ t('form.required') }}
         </label>
       </div>
-      <VeeErrorMessage as="div" name="register.privacyPolicy" class="text-negative-700 text-left text-sm" />
+      <ErrorMessage as="div" name="register.privacyPolicy" class="text-negative-700 text-left text-sm" />
 
       <NuxtTurnstile
         v-if="turnstileSiteKey"
-        v-model="turnstile"
         v-bind="turnstileAttributes"
         ref="turnstileElement"
+        v-model="turnstile"
         :options="{ theme: 'light' }"
         class="mt-4 flex justify-center"
       />
 
-      <VeeErrorMessage as="div" name="register.turnstile" class="text-negative-700 text-center text-sm" />
+      <ErrorMessage as="div" name="register.turnstile" class="text-negative-700 text-center text-sm" />
 
       <UiButton type="submit" class="mt-2" :disabled="loading || migrateLoading">
         <SfLoaderCircular v-if="loading || migrateLoading" class="flex justify-center items-center" size="base" />
@@ -128,7 +128,7 @@
 
       <div v-if="changeableView" class="text-center">
         <div class="my-5 font-bold">{{ t('auth.signup.alreadyHaveAccount') }}</div>
-        <SfLink @click="$emit('change-view')" variant="primary" class="cursor-pointer">
+        <SfLink variant="primary" class="cursor-pointer" @click="$emit('change-view')">
           {{ t('auth.signup.logInLinkLabel') }}
         </SfLink>
       </div>
@@ -149,7 +149,8 @@ import {
   SfIconCheck,
   SfIconClose,
 } from '@storefront-ui/vue';
-import { useForm } from 'vee-validate';
+import { useForm, ErrorMessage } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/yup';
 import { object, string, boolean, ref as yupReference } from 'yup';
 import type { RegisterFormParams } from '~/components/Register/types';
 import { useMigrateGuestOrder } from '~/composables/useMigrateGuestOrder';
@@ -165,10 +166,7 @@ const viewport = useViewport();
 const runtimeConfig = useRuntimeConfig();
 
 const emits = defineEmits(['registered', 'change-view']);
-const props = withDefaults(defineProps<RegisterFormParams>(), {
-  isModal: false,
-  changeableView: true,
-});
+const { emailAddress, order, isModal = false, changeableView = true } = defineProps<RegisterFormParams>();
 
 const turnstileSiteKey = runtimeConfig.public?.turnstileSiteKey ?? '';
 const turnstileElement = ref();
@@ -204,8 +202,8 @@ const [repeatPassword, repeatPasswordAttributes] = defineField('register.repeatP
 const [turnstile, turnstileAttributes] = defineField('register.turnstile');
 const [privacyPolicy, privacyPolicyAttributes] = defineField('register.privacyPolicy');
 
-if (props.emailAddress) {
-  email.value = props.emailAddress;
+if (emailAddress) {
+  email.value = emailAddress;
 }
 
 const clearTurnstile = () => {
@@ -213,7 +211,6 @@ const clearTurnstile = () => {
   turnstileElement.value?.reset();
 };
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
 const registerUser = async () => {
   if (!meta.value.valid || (!turnstile.value && turnstileSiteKey.length > 0)) {
     return;
@@ -240,19 +237,19 @@ const registerUser = async () => {
       type: 'positive',
     });
 
-    if (props.order) {
+    if (order) {
       await migrateGuestOrder({
-        orderId: props.order?.order.id ?? -1,
-        accessKey: props.order?.order.accessKey ?? '',
-        postcode: props.order?.order.deliveryAddress.postalCode ?? undefined,
-        name: props.order?.order.deliveryAddress.name3 ?? undefined,
+        orderId: order?.order.id ?? -1,
+        accessKey: order?.order.accessKey ?? '',
+        postcode: order?.order.deliveryAddress.postalCode ?? undefined,
+        name: order?.order.deliveryAddress.name3 ?? undefined,
       });
     }
 
     emits('registered');
     clearTurnstile();
 
-    if (!props.order) {
+    if (!order) {
       viewport.isGreaterOrEquals('lg') ? router.push(router.currentRoute.value.path) : router.back();
     }
   }
