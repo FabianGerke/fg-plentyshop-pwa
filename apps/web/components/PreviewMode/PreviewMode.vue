@@ -50,8 +50,11 @@ const removeLookupCookie: RemoveLookupCookie = (index: number): void => {
     const cookiePair = cookie.split('=')
     const name = cookiePair[0].trim()
 
+    console.log(foundCookies[index], name, new RegExp(foundCookies[index]).test(name));
+
     if (new RegExp(foundCookies[index]).test(name)) {
       document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC;`
+      console.log(document.cookie);
     }
   })
 
