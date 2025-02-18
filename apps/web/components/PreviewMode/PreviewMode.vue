@@ -44,8 +44,19 @@ const foundCookies = defaults.PREVIEW_COOKIES.filter((cookie) => !!useCookie(coo
 const useClassFor = (index: number): boolean => foundCookies.length > 1 && index !== 0;
 
 const removeLookupCookie: RemoveLookupCookie = (index: number): void => {
-  useCookie(foundCookies[index]).value = null;
+  const router = useRouter();
+  const browserCookie = document.cookie.split(';');
+  browserCookie.forEach((cookie: string) => {
+    const cookiePair = cookie.split('=')
+    const name = cookiePair[0].trim()
+
+    if (new RegExp(foundCookies[index]).test(name)) {
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC;`
+    }
+  })
+
   bannerIsHidden.value = true;
   foundCookies.splice(index, 1);
+  router.go(0);
 };
 </script>
