@@ -46,7 +46,9 @@ const removeLookupCookie: RemoveLookupCookie = (index: number): void => {
   const { public: config } = useRuntimeConfig();
   useCookie(foundCookies[index], {path: '/', domain: config.apiEndpoint}).value = null;
   useCookie(foundCookies[index], {path: '/', domain: config.domain}).value = null;
-  console.log("delete cookie");
+  useCookie(foundCookies[index], {path: '/', domain: '.' + config.apiEndpoint}).value = null;
+  useCookie(foundCookies[index], {path: '/', domain: '.' + config.domain}).value = null;
+  console.log("delete cookie", config.apiEndpoint, config.domain);
   bannerIsHidden.value = true;
   foundCookies.splice(index, 1);
   // window.location.reload();
