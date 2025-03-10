@@ -342,6 +342,7 @@
     "heading": "Payment method",
     "noMethodsAvailable": "There are no payment methods available. Please contact the webshop provider."
   },
+  "checkoutExportDelivery": "By placing the order I recognise that my order is shipped from {shopCountry} to {deliveryCountry}. The local VAT, costs of customs clearance and customs duties are not included in the total amount of the order and have to be settled with third parties. I bear the costs.",
   "clear": "Clear",
   "clearFilters": "Clear all filters",
   "closeDialog": "Close Dialog",
@@ -519,6 +520,14 @@
       "match": "Passwords do not match.",
       "required": "Password is required.",
       "valid": "Password must be at least 8 characters long and include at least one letter and one number."
+    },
+    "editor": {
+      "save": {
+        "success": "Your changes have been saved.",
+        "editor": "Changes to page content are published immediately if the homepage category is linked to the live shop.",
+        "settings": "To publish settings, build the shop and set the instance to live mode.",
+        "error": "The changes couldn't be saved. Your session may have expired. Re-enter the editor to start a new session."
+      }
     },
     "paymentFailed": "The payment has failed. Please try again.",
     "pleaseFillOutAllFields": "Please fill out all these fields.",

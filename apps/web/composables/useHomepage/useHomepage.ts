@@ -2,7 +2,6 @@ import homepageTemplateDataEn from './homepageTemplateDataEn.json';
 import homepageTemplateDataDe from './homepageTemplateDataDe.json';
 import type { HomepageData, UseHomepageDataReturn, UseHomepageDataState, SetIndex, ActiveSlideIndex } from './types';
 import type { BannerProps } from '~/components/blocks/BannerCarousel/types';
-import type { ProductRecommendedProductsProps } from '~/components/blocks/ProductRecommendedProducts/types';
 
 const useLocaleSpecificHomepageTemplate = (locale: string) =>
   locale === 'de' ? (homepageTemplateDataDe as HomepageData) : (homepageTemplateDataEn as HomepageData);
@@ -26,20 +25,6 @@ export const useHomepage: UseHomepageDataReturn = () => {
   const { fetchCategoryTemplate } = useCategoryTemplate();
   const { fetchHomepageTemplate } = useFetchHome();
 
-  const fetchRecommendedProducts = async () => {
-    state.value.data.blocks.forEach((block) => {
-      if (block.name === 'ProductRecommendedProducts') {
-        const options = block.options as ProductRecommendedProductsProps;
-        const id = options.categoryId;
-
-        if (tryUseNuxtApp()) {
-          const { fetchProductRecommended } = useProductRecommended(id);
-          fetchProductRecommended(id);
-        }
-      }
-    });
-  };
-
   const initializeHomepageTemplate = async () => {
     if (typeof homepageCategoryId === 'number') {
       await fetchCategoryTemplate(homepageCategoryId);
@@ -54,9 +39,7 @@ export const useHomepage: UseHomepageDataReturn = () => {
       state.value.data = useLocaleSpecificHomepageTemplate(currentLocale.value);
     }
 
-    state.value.initialBlocks = state.value.data.blocks.map((block) => toRaw(block));
-
-    await fetchRecommendedProducts();
+    state.value.initialBlocks = structuredClone(toRaw(state.value.data.blocks));
   };
 
   const fetchPageTemplate = async (): Promise<void> => {

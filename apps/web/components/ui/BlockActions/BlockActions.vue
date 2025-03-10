@@ -64,17 +64,29 @@ const emit = defineEmits(['edit', 'delete', 'change-position']);
 const { openDrawerWithView } = useSiteConfiguration();
 
 const triggerEdit = () => {
-  if (useRuntimeConfig().public.experimentalBlockEditForm) {
-    openDrawerWithView('blocksSettings', props.blocks.name, props.index);
-  } else {
-    emit('edit', props.index);
-  }
+  openDrawerWithView('blocksSettings', props.blocks.name, props.index);
 };
+
 const triggerDelete = () => {
   emit('delete', props.index);
 };
 
+const scrollToBlock = (newIndex: number) => {
+  const block = document.getElementById(`block-${newIndex}`);
+  if (block) {
+    block.scrollIntoView(true);
+    window.scrollBy(0, -200);
+  }
+};
+let timeoutId: ReturnType<typeof setTimeout>;
+
 const changePosition = (position: number) => {
   emit('change-position', props.index, position);
+  if (timeoutId) {
+    clearTimeout(timeoutId);
+  }
+  timeoutId = setTimeout(() => {
+    scrollToBlock(props.index + position);
+  }, 100);
 };
 </script>

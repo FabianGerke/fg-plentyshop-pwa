@@ -35,6 +35,7 @@
           <SfLoaderCircular v-if="cartLoading" class="absolute top-[130px] right-0 left-0 m-auto z-[999]" size="2xl" />
           <Coupon />
           <OrderSummary v-if="cart" :cart="cart" class="mt-4">
+            <CheckoutExportDeliveryHint v-if="cart.isExportDelivery" />
             <div v-if="selectedPaymentId === paypalPaymentId">
               <PayPalExpressButton
                 :disabled="!termsAccepted || disableBuyButton"
@@ -95,7 +96,7 @@
 
 <script setup lang="ts">
 import { SfLoaderCircular } from '@storefront-ui/vue';
-import _ from 'lodash';
+import { keyBy } from '~/utils/keyBy';
 import PayPalExpressButton from '~/components/PayPal/PayPalExpressButton.vue';
 import {
   PayPalCreditCardPaymentKey,
@@ -253,7 +254,7 @@ const order = async () => {
   if (!readyToBuy()) return;
 
   processingOrder.value = true;
-  const paymentMethodsById = _.keyBy(paymentMethods.value.list, 'id');
+  const paymentMethodsById = keyBy(paymentMethods.value.list, 'id');
 
   paymentMethodsById[selectedPaymentId.value].key === 'plentyPayPal'
     ? (paypalCardDialog.value = true)

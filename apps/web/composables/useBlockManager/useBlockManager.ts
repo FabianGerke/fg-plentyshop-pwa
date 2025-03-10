@@ -1,5 +1,5 @@
-import { deepEqual } from '~/utils/jsonHelper';
-import { blocksLists } from '~/blocks/blocksLists';
+import type { BlocksList } from '../../components/BlocksNavigationList/types';
+const blocksLists = ref<BlocksList>({});
 
 const isEmptyBlock = (block: Block): boolean => {
   const options = block?.options;
@@ -16,22 +16,29 @@ const togglePlaceholder = (index: number, position: 'top' | 'bottom') => {
 
 export const useBlockManager = () => {
   const { $i18n } = useNuxtApp();
-  const { data, initialBlocks } = useHomepage();
-  const { isEditing, isEditingEnabled } = useEditor();
+  const { data } = useHomepage();
 
-  const currentBlock = ref<Block | null>(null);
-  const currentBlockIndex = ref<number | null>(null);
   const isClicked = ref(false);
   const clickedBlockIndex = ref<number | null>(null);
-
   const viewport = useViewport();
   const isTablet = computed(() => viewport.isLessThan('lg') && viewport.isGreaterThan('sm'));
 
   const isPreview = ref(false);
-  const experimentalBlockEditForm = ref(useRuntimeConfig().public.experimentalBlockEditForm);
+
+  const getBlocksLists = async () => {
+    try {
+      const response = await fetch('/blocks/blocksLists.json');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      blocksLists.value = await response.json();
+    } catch (error) {
+      throw new Error(`Failed to fetch blocksLists: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
 
   const getTemplateByLanguage = (category: string, variationIndex: number, lang: string) => {
-    const variationsInCategory = blocksLists[category];
+    const variationsInCategory = blocksLists.value[category];
     const variationToAdd = variationsInCategory.variations[variationIndex];
     const variationTemplate = variationToAdd.template;
 
@@ -45,7 +52,6 @@ export const useBlockManager = () => {
     updatedBlocks.splice(position, 0, newBlock);
     data.value.blocks = updatedBlocks;
     visiblePlaceholder.value = { index: null, position: null };
-    isEditingEnabled.value = !deepEqual(initialBlocks.value, data.value.blocks);
   };
 
   const changeBlockPosition = (index: number, position: number) => {
@@ -58,13 +64,12 @@ export const useBlockManager = () => {
     updatedBlocks.splice(newIndex, 0, blockToChange);
 
     data.value.blocks = updatedBlocks;
-
-    isEditingEnabled.value = !deepEqual(initialBlocks.value, data.value.blocks);
   };
 
   const isLastBlock = (index: number) => index === data.value.blocks.length - 1;
 
   onMounted(() => {
+    getBlocksLists();
     const config = useRuntimeConfig().public;
     const showConfigurationDrawer = config.showConfigurationDrawer;
     const pwaCookie = useCookie('pwa');
@@ -78,22 +83,9 @@ export const useBlockManager = () => {
     }
   };
 
-  const handleEdit = (index: number) => {
-    if (data.value.blocks && data.value.blocks.length > index) {
-      if (experimentalBlockEditForm.value) {
-        // TODO: Implement new block edit form
-      } else {
-        currentBlockIndex.value = index;
-        currentBlock.value = data.value.blocks[index];
-        isEditing.value = true;
-      }
-    }
-  };
-
   const deleteBlock = (index: number) => {
     if (data.value.blocks && index !== null && index < data.value.blocks.length) {
       data.value.blocks.splice(index, 1);
-      isEditingEnabled.value = !deepEqual(initialBlocks.value, data.value.blocks);
 
       const { closeDrawer } = useSiteConfiguration();
       closeDrawer();
@@ -107,15 +99,12 @@ export const useBlockManager = () => {
   };
 
   return {
-    currentBlock,
-    currentBlockIndex,
     isClicked,
     clickedBlockIndex,
     isTablet,
     isPreview,
     blockHasData,
     tabletEdit,
-    handleEdit,
     deleteBlock,
     updateBlock,
     changeBlockPosition,

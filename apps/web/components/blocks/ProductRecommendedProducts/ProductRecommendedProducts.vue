@@ -1,5 +1,5 @@
 <template>
-  <TextContent class="pb-4" :text="props.text" />
+  <TextContent data-testid="recommended-block" class="pb-4" :text="props.text" :index="props.index" />
   <ProductSlider v-if="recommendedProducts?.length" :items="recommendedProducts" />
 </template>
 
@@ -9,9 +9,7 @@ import { watchDebounced } from '@vueuse/core';
 
 const props = defineProps<ProductRecommendedProductsProps>();
 const { data: recommendedProducts, fetchProductRecommended } = useProductRecommended(props.categoryId + props.cacheKey);
-if (props.categoryId) {
-  fetchProductRecommended(props.categoryId);
-}
+
 watchDebounced(
   () => props.categoryId,
   () => {
@@ -19,6 +17,6 @@ watchDebounced(
       fetchProductRecommended(props.categoryId);
     }
   },
-  { debounce: 500 },
+  { debounce: 500, immediate: true },
 );
 </script>

@@ -108,11 +108,11 @@
           "variant": "primary"
         },
         "image": {
-          "xl": "https://cdn02.plentymarkets.com/mevofvd5omld/frontend/headphones-mediacard.avif",
-          "lg": "https://cdn02.plentymarkets.com/mevofvd5omld/frontend/headphones-mediacard.avif",
-          "md": "https://cdn02.plentymarkets.com/mevofvd5omld/frontend/headphones-mediacard.avif",
-          "sm": "https://cdn02.plentymarkets.com/mevofvd5omld/frontend/headphones-mediacard.avif",
-          "alt": "Headphones",
+          "wideScreen": "https://cdn02.plentymarkets.com/mevofvd5omld/frontend/headphones-mediacard.avif",
+          "desktop": "https://cdn02.plentymarkets.com/mevofvd5omld/frontend/headphones-mediacard.avif",
+          "tablet": "https://cdn02.plentymarkets.com/mevofvd5omld/frontend/headphones-mediacard.avif",
+          "mobile": "https://cdn02.plentymarkets.com/mevofvd5omld/frontend/headphones-mediacard.avif",
+          "alt": "Kopfhörer",
           "imageAlignment": "left"
         }
       }
@@ -124,7 +124,7 @@
           "pretitle": "Mehr als nur Technik",
           "title": "Entdecken Sie unsere Modekollektion",
           "subtitle": "Sportive Mode und Accessories für alle.",
-          "htmlDescription": "<a class='underline' href='https://plentyshop.plentymarkets.com/wear' target='_self'>Zu unserer kompletten Kollektion.</a>"
+          "htmlDescription": "<a class='underline' href='https://plentyshop.plentymarkets.com/kleidung' target='_self'>Zu unserer kompletten Kollektion.</a>"
         },
         "categoryId": "49"
       }
@@ -138,7 +138,7 @@
           "htmlDescription": "Informieren Sie sich über bevorstehende Aktionen und Veranstaltungen. Erhalten Sie Geschenke und Sonderangebote!"
         },
         "input": {
-          "displayNameInput": false,
+          "displayNameInput": true,
           "nameIsRequired": false
         },
         "button": {

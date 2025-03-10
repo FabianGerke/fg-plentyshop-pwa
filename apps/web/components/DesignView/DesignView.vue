@@ -2,7 +2,7 @@
   <div class="site-settings-view sticky top-[52px]" data-testid="site-settings-drawer">
     <header class="flex items-center justify-between px-4 py-5 border-b">
       <div class="flex items-center text-xl font-bold">Settings</div>
-      <button class="!p-0" @click="drawerOpen = false">
+      <button data-testid="design-view-close" class="!p-0" @click="closeDrawer">
         <SfIconClose />
       </button>
     </header>
@@ -138,15 +138,19 @@
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.min.css';
 import { SfIconClose, SfIconInfo, SfInput, SfTooltip } from '@storefront-ui/vue';
-import fonts from '~/fonts/meta.json';
 import { _s, _m, _l, _xl } from '#tailwind-config/theme/spacing';
 
-const { drawerOpen, loadGoogleFont, primaryColor, secondaryColor, updateBlockSize, blockSize, selectedFont } =
+const { closeDrawer, loadGoogleFont, primaryColor, secondaryColor, updateBlockSize, blockSize, selectedFont } =
   useSiteConfiguration();
 
 const fontsOpen = ref(false);
 const colorsOpen = ref(false);
 const blocksSpacingOpen = ref(false);
+
+const fonts = ref([]);
+
+const response = await fetch('/fonts/meta.json');
+fonts.value = await response.json();
 
 const btnClasses = ref(
   'py-2 leading-6 px-4 gap-2 !hover:bg-gray-100 uppercase inline-flex items-center justify-center font-medium text-base focus-visible:outline focus-visible:outline-offset rounded-md disabled:text-disabled-500 disabled:bg-disabled-300 disabled:shadow-none disabled:ring-0 disabled:cursor-not-allowed',
