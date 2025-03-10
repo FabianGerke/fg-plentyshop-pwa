@@ -43,14 +43,11 @@ const foundCookies = defaults.PREVIEW_COOKIES.filter((cookie) => !!useCookie(coo
 const useClassFor = (index: number): boolean => foundCookies.length > 1 && index !== 0;
 
 const removeLookupCookie: RemoveLookupCookie = (index: number): void => {
-const { public: config } = useRuntimeConfig();
-  const domain = config.apiEndpoint.replace('https://', '');
-  const domain2 = config.domain.replace('https://', '');
+  const { public: config } = useRuntimeConfig();
+  const domain = config.domain.replace('https://', '');
   useCookie(foundCookies[index], {path: '/', domain: domain}).value = null;
-  useCookie(foundCookies[index], {path: '/', domain: '.' + domain}).value = null;
-  useCookie(foundCookies[index], {path: '/', domain: domain2}).value = null;
-  useCookie(foundCookies[index], {path: '/', domain: '.' + domain2}).value = null;
-  console.log('FGE', domain, domain2);
+  // useCookie(foundCookies[index], {path: '/', domain: '.' + domain}).value = null;
+  console.log('FGE2', domain);
   bannerIsHidden.value = true;
   foundCookies.splice(index, 1);
   // window.location.reload();
