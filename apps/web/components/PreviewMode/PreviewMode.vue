@@ -44,11 +44,11 @@ const useClassFor = (index: number): boolean => foundCookies.length > 1 && index
 
 const removeLookupCookie: RemoveLookupCookie = (index: number): void => {
   const { public: config } = useRuntimeConfig();
-  useCookie(foundCookies[index], {path: '/', domain: config.apiEndpoint}).value = null;
-  useCookie(foundCookies[index], {path: '/', domain: config.domain}).value = null;
-  useCookie(foundCookies[index], {path: '/', domain: '.' + config.apiEndpoint}).value = null;
-  useCookie(foundCookies[index], {path: '/', domain: '.' + config.domain}).value = null;
-  console.log("delete cookie", config.apiEndpoint, config.domain);
+  const { public: config } = useRuntimeConfig();
+  const domain = config.apiEndpoint.replace('https://', '');
+  useCookie(foundCookies[index], {path: '/', domain: domain}).value = null;
+  useCookie(foundCookies[index], {path: '/', domain: '.' + domain}).value = null;
+  console.log("delete cookie", domain, 'fge');
   bannerIsHidden.value = true;
   foundCookies.splice(index, 1);
   // window.location.reload();
