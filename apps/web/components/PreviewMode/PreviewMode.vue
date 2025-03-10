@@ -44,7 +44,6 @@ const useClassFor = (index: number): boolean => foundCookies.length > 1 && index
 
 const removeLookupCookie: RemoveLookupCookie = (index: number): void => {
   const { public: config } = useRuntimeConfig();
-  const { public: config } = useRuntimeConfig();
   const domain = config.apiEndpoint.replace('https://', '');
   useCookie(foundCookies[index], {path: '/', domain: domain}).value = null;
   useCookie(foundCookies[index], {path: '/', domain: '.' + domain}).value = null;
