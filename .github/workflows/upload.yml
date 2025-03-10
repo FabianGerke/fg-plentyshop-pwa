@@ -74,7 +74,7 @@ jobs:
         id: upload-production
         uses: JantHsueh/upload-file-action@1.0
         with:
-          url: 'https://pwapublish.plentysystems.com'
+          url: 'https://pwapublish.114.plenty.rocks'
           forms: '{ "token": "${{ secrets.URL_ENDPOINT_TOKEN }}" }'
           fileForms: '{ "file": "pwa.tar.gz" }'
 
@@ -83,6 +83,6 @@ jobs:
         id: upload-staging
         uses: JantHsueh/upload-file-action@1.0
         with:
-          url: 'https://pwapublish.plentysystems.com'
+          url: 'https://pwapublish.114.plenty.rocks'
           forms: '{ "token": "${{ secrets.URL_ENDPOINT_TOKEN_STAGING }}" }'
           fileForms: '{ "file": "pwa.tar.gz" }'
